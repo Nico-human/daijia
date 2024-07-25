@@ -1,6 +1,7 @@
 package com.atguigu.daijia.customer.service;
 
 import com.atguigu.daijia.model.entity.customer.CustomerInfo;
+import com.atguigu.daijia.model.vo.customer.CustomerLoginVo;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 public interface CustomerInfoService extends IService<CustomerInfo> {
@@ -12,4 +13,11 @@ public interface CustomerInfoService extends IService<CustomerInfo> {
      */
     Long login(String code);
 
+    /**
+     * 根据传递的用户id查询数据库表(customer_info)中的用户信息, 并封装到CustomerLoginVo对象中,
+     * 最后返回这个对象
+     * @param customerId, 用户id
+     * @return CustomerLoginVo对象, 用户信息
+     */
+    CustomerLoginVo getCustomerInfo(Long customerId);
 }
