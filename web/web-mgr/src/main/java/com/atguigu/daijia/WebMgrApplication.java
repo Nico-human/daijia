@@ -14,5 +14,4 @@ public class WebMgrApplication {
     public static void main(String[] args) {
         SpringApplication.run(WebMgrApplication.class, args);
     }
-
 }

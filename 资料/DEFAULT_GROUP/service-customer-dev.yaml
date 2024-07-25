@@ -39,6 +39,7 @@ spring:
   datasource:
     type: com.zaxxer.hikari.HikariDataSource
     driver-class-name: com.mysql.jdbc.Driver
+    # TODO: mysql时区不对, 修改此处(&serverTimezone=Asia/Shanghai)或者进入docker中修改MySQL配置
     url: jdbc:mysql://139.198.104.58:3306/daijia_customer?characterEncoding=utf-8&useSSL=false
     username: root
     password: shangguigu@QY123
