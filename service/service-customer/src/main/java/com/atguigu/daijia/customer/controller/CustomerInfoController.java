@@ -4,6 +4,7 @@ import com.atguigu.daijia.common.result.Result;
 import com.atguigu.daijia.customer.service.CustomerInfoService;
 import com.atguigu.daijia.model.entity.customer.CustomerInfo;
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.validation.constraints.NotNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,6 +20,12 @@ public class CustomerInfoController {
 
 	@Autowired
 	private CustomerInfoService customerInfoService;
+
+	@Operation(summary = "小程序授权登录")
+	@GetMapping("/login/{code}")
+	public Result<Long> login(@PathVariable String code) {
+		return Result.ok(customerInfoService.login(code));
+	}
 
 	@Operation(summary = "获取客户基本信息")
 	@GetMapping("/getCustomerInfo/{customerId}")
