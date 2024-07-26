@@ -18,8 +18,8 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 public class MybatisPlusConfig {
 
     /**
-     *
-     * @return
+     * 配置分页拦截器
+     * @return MybatisPlusInterceptor
      */
     @Bean
     public MybatisPlusInterceptor optimisticLockerInnerInterceptor(){
