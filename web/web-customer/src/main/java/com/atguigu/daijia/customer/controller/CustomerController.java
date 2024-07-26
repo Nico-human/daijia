@@ -1,7 +1,10 @@
 package com.atguigu.daijia.customer.controller;
 
+import com.atguigu.daijia.common.login.LoginAuth;
 import com.atguigu.daijia.common.result.Result;
+import com.atguigu.daijia.common.util.AuthContextHolder;
 import com.atguigu.daijia.customer.service.CustomerService;
+import com.atguigu.daijia.model.form.customer.UpdateWxPhoneForm;
 import com.atguigu.daijia.model.vo.customer.CustomerLoginVo;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -27,10 +30,28 @@ public class CustomerController {
 
     @Operation(summary = "获取客户登录信息")
     @GetMapping("/getCustomerLoginInfo")
-    public Result<CustomerLoginVo> getCustomerInfo(@RequestHeader(value = "token") String token) {
-        CustomerLoginVo customerLoginVo = customerService.getCustomerLoginInfo(token);
+    @LoginAuth
+    public Result<CustomerLoginVo> getCustomerInfo() {
+        Long customerId = AuthContextHolder.getUserId();
+        CustomerLoginVo customerLoginVo = customerService.getCustomerInfo(customerId);
         return Result.ok(customerLoginVo);
     }
+
+    @Operation(summary = "更新用户微信手机号")
+    @LoginAuth
+    @PostMapping("/updateWxPhone")
+    public Result<Boolean> updateWxPhone(@RequestBody UpdateWxPhoneForm updateWxPhoneForm) {
+        updateWxPhoneForm.setCustomerId(AuthContextHolder.getUserId());
+//        Boolean result = customerService.updateWxPhoneNumber(updateWxPhoneForm);
+        return Result.ok(true); // TODO: 企业微信个人版无法测试
+    }
+
+//    @Operation(summary = "获取客户登录信息")
+//    @GetMapping("/getCustomerLoginInfo")
+//    public Result<CustomerLoginVo> getCustomerInfo(@RequestHeader(value = "token") String token) {
+//        CustomerLoginVo customerLoginVo = customerService.getCustomerLoginInfo(token);
+//        return Result.ok(customerLoginVo);
+//    }
 
 }
 
