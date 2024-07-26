@@ -11,6 +11,9 @@ public class SystemConstant {
     //默认接单距离，单位：公里
     public static final int ACCEPT_DISTANCE = 5;
 
+    //默认不自动接单
+    public static final int IS_AUTO_ACCEPT = 0;
+
     //司机的位置与代驾起始点位置的确认距离，单位：米
     public static final int DRIVER_START_LOCATION_DISTION = 1000;
 
