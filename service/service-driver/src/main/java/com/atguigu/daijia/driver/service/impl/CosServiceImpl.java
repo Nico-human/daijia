@@ -81,7 +81,7 @@ public class CosServiceImpl implements CosService {
         return new COSClient(cred, clientConfig);
     }
 
-    private String getImageUrl(String path) {
+    public String getImageUrl(String path) {
 
         if(!StringUtils.hasText(path)){
             return "";

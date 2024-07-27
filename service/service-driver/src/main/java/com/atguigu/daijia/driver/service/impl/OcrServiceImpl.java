@@ -124,27 +124,28 @@ public class OcrServiceImpl implements OcrService {
 
             //封装到Vo对象中
             DriverLicenseOcrVo driverLicenseOcrVo = new DriverLicenseOcrVo();
-            if (StringUtils.hasText(resp.getName())){
-                // 驾驶证正面
-                // 驾驶证名称要和身份证名称完全一致
-                driverLicenseOcrVo.setName(resp.getName());
-                driverLicenseOcrVo.setDriverLicenseClazz(resp.getClass_());
-                driverLicenseOcrVo.setDriverLicenseNo(resp.getCardCode());
-                driverLicenseOcrVo.setDriverLicenseIssueDate(DateTimeFormat.forPattern("yyyy-MM-dd").parseDateTime(resp.getDateOfFirstIssue()).toDate());
-                driverLicenseOcrVo.setDriverLicenseExpire(DateTimeFormat.forPattern("yyyy-MM-dd").parseDateTime(resp.getEndDate()).toDate());
+            driverLicenseOcrVo.setName(resp.getName());
+            driverLicenseOcrVo.setDriverLicenseClazz(resp.getClass_());
+            driverLicenseOcrVo.setDriverLicenseNo(resp.getCardCode());
+            driverLicenseOcrVo.setDriverLicenseIssueDate(DateTimeFormat.forPattern("yyyy-MM-dd").parseDateTime(resp.getDateOfFirstIssue()).toDate());
+            driverLicenseOcrVo.setDriverLicenseExpire(DateTimeFormat.forPattern("yyyy-MM-dd").parseDateTime(resp.getEndDate()).toDate());
 
-                //上传驾驶证反面到腾讯云cos
-                CosUploadVo cosUploadVo = cosService.upload(file, "driverLicense");
-                driverLicenseOcrVo.setDriverLicenseBackUrl(cosUploadVo.getUrl());
-                driverLicenseOcrVo.setDriverLicenseBackShowUrl(cosUploadVo.getShowUrl());
+            //上传驾驶证主页到腾讯云cos
+            CosUploadVo cosUploadVo = cosService.upload(file, "driverLicense");
+            driverLicenseOcrVo.setDriverLicenseFrontUrl(cosUploadVo.getUrl());
+            driverLicenseOcrVo.setDriverLicenseFrontShowUrl(cosUploadVo.getShowUrl());
+            //TODO 判断驾照 正副页的逻辑必须在传入腾讯云接口之前,
+            // 因为腾讯云默认识别主页(参数cardSide="FRONT"), 所以这个接口只能识别驾照主页(识别副页需要另写一个接口, 前端没写)
 
-            }else{
-                //上传驾驶证正面到腾讯云cos
-                CosUploadVo cosUploadVo = cosService.upload(file, "driverLicense");
-                driverLicenseOcrVo.setDriverLicenseFrontUrl(cosUploadVo.getUrl());
-                driverLicenseOcrVo.setDriverLicenseFrontShowUrl(cosUploadVo.getShowUrl());
+//            else{
+//                //上传驾驶证正面到腾讯云cos
+//                CosUploadVo cosUploadVo = cosService.upload(file, "driverLicense");
+////                driverLicenseOcrVo.setName(resp.getName());
+//                driverLicenseOcrVo.setDriverLicenseBackUrl(cosUploadVo.getUrl());
+//                driverLicenseOcrVo.setDriverLicenseBackShowUrl(cosUploadVo.getShowUrl());
+//
+//            }
 
-            }
             return driverLicenseOcrVo;
         } catch (TencentCloudSDKException | IOException e) {
             throw new RuntimeException(e);

@@ -1,9 +1,13 @@
 package com.atguigu.daijia.driver.controller;
 
+import com.atguigu.daijia.common.annotation.Log;
 import com.atguigu.daijia.common.login.LoginAuth;
 import com.atguigu.daijia.common.result.Result;
 import com.atguigu.daijia.common.util.AuthContextHolder;
 import com.atguigu.daijia.driver.service.DriverService;
+import com.atguigu.daijia.model.form.driver.DriverFaceModelForm;
+import com.atguigu.daijia.model.form.driver.UpdateDriverAuthInfoForm;
+import com.atguigu.daijia.model.vo.driver.DriverAuthInfoVo;
 import com.atguigu.daijia.model.vo.driver.DriverLoginVo;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -37,5 +41,31 @@ public class DriverController {
         return Result.ok(driverLoginVo);
     }
 
+    @Operation(summary = "获取司机认证信息")
+    @GetMapping("/getDriverAuthInfo")
+    @LoginAuth
+    public Result<DriverAuthInfoVo> getDriverAuthInfo() {
+        Long driverId = AuthContextHolder.getUserId();
+        DriverAuthInfoVo driverAuthInfoVo = driverService.getDriverAuthInfo(driverId);
+        return Result.ok(driverAuthInfoVo);
+    }
+
+    @Operation(summary = "更新司机认证信息")
+    @PostMapping("/updateDriverAuthInfo")
+    @LoginAuth
+    public Result<Boolean> updateDriverAuthInfo(@RequestBody UpdateDriverAuthInfoForm updateDriverAuthInfoForm){
+        Long driverId = AuthContextHolder.getUserId();
+        updateDriverAuthInfoForm.setDriverId(driverId);
+        return Result.ok(driverService.updateDriverAuthInfo(updateDriverAuthInfoForm));
+    }
+
+    @Operation(summary = "创建司机人脸模型")
+    @PostMapping("/creatDriverFaceModel") //TODO 前端给的逆天接口( creat ?)
+    @LoginAuth
+    public Result<Boolean> createDriverFaceModel(@RequestBody DriverFaceModelForm driverFaceModelForm) {
+        Long driverId = AuthContextHolder.getUserId();
+        driverFaceModelForm.setDriverId(driverId);
+        return Result.ok(driverService.createDriverFaceModel(driverFaceModelForm));
+    }
 }
 

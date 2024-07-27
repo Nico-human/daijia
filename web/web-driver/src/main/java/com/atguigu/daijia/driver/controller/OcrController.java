@@ -34,7 +34,7 @@ public class OcrController {
 
     @Operation(summary = "驾驶证识别")
     @PostMapping("/driverLicenseOcr")
-    @LoginAuth //TODO 测试时注释掉
+//    @LoginAuth //TODO 测试时注释掉
     public Result<DriverLicenseOcrVo> uploadDriverLicenseOcr(@RequestPart("file") MultipartFile file) {
         return Result.ok(ocrService.driverLicenseOcr(file));
     }

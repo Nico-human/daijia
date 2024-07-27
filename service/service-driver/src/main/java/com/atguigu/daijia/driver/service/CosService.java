@@ -12,4 +12,10 @@ public interface CosService {
      */
     CosUploadVo upload(MultipartFile file, String path);
 
+    /**
+     * 根据给定的路径(文件在腾讯云中的存储地址), 生成临时Url, 以展示信息
+     * @param path 路径
+     * @return 临时Url
+     */
+    String getImageUrl(String path);
 }
