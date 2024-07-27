@@ -1,5 +1,8 @@
 package com.atguigu.daijia.driver.service;
 
+import com.atguigu.daijia.model.form.driver.DriverFaceModelForm;
+import com.atguigu.daijia.model.form.driver.UpdateDriverAuthInfoForm;
+import com.atguigu.daijia.model.vo.driver.DriverAuthInfoVo;
 import com.atguigu.daijia.model.vo.driver.DriverLoginVo;
 
 public interface DriverService {
@@ -14,9 +17,30 @@ public interface DriverService {
     String login(String code);
 
     /**
-     * 根据司机id远程调用获取司机信息(封装对象), 并返回封装对象
+     * 根据司机id远程调用获取司机登录信息(封装对象), 并返回封装对象
      * @param driverId 司机id
      * @return DriverLoginVo封装对象
      */
     DriverLoginVo getDriverLoginInfo(Long driverId);
+
+    /**
+     * 根据司机id远程调用获取司机认证信息, 并返回封装对象
+     * @param driverId 司机id
+     * @return Vo对象
+     */
+    DriverAuthInfoVo getDriverAuthInfo(Long driverId);
+
+    /**
+     * 更新司机认证信息
+     * @param updateDriverAuthInfoForm
+     * @return
+     */
+    Boolean updateDriverAuthInfo(UpdateDriverAuthInfoForm updateDriverAuthInfoForm);
+
+    /**
+     * 创建司机人脸模型
+     * @param driverFaceModelForm
+     * @return
+     */
+    Boolean createDriverFaceModel(DriverFaceModelForm driverFaceModelForm);
 }

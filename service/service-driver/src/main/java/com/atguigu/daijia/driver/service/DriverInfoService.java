@@ -1,6 +1,9 @@
 package com.atguigu.daijia.driver.service;
 
 import com.atguigu.daijia.model.entity.driver.DriverInfo;
+import com.atguigu.daijia.model.form.driver.DriverFaceModelForm;
+import com.atguigu.daijia.model.form.driver.UpdateDriverAuthInfoForm;
+import com.atguigu.daijia.model.vo.driver.DriverAuthInfoVo;
 import com.atguigu.daijia.model.vo.driver.DriverLoginVo;
 import com.baomidou.mybatisplus.extension.service.IService;
 
@@ -23,4 +26,26 @@ public interface DriverInfoService extends IService<DriverInfo> {
      * @return DriverLoginVo封装对象
      */
     DriverLoginVo getDriverInfo(Long driverId);
+
+    /**
+     * 根据司机id查询数据库, 并通过司机信息(身份证, 驾驶证)在腾讯云中的Url,
+     * 请求腾讯云接口生成临时Url地址(展示给用户), 将信息封装为Vo对象
+     * @param driverId
+     * @return
+     */
+    DriverAuthInfoVo getDriverAuthInfo(Long driverId);
+
+    /**
+     *
+     * @param updateDriverAuthInfoForm
+     * @return
+     */
+    Boolean updateDriverAuthInfo(UpdateDriverAuthInfoForm updateDriverAuthInfoForm);
+
+    /**
+     *
+     * @param driverFaceModelForm
+     * @return
+     */
+    Boolean createDriverFaceModel(DriverFaceModelForm driverFaceModelForm);
 }

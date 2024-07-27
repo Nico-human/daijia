@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 public interface DriverInfoFeignClient {
 
     /**
-     * 小程序授权登录, 远程调用
+     * 小程序授权登录
      * @param code
      * @return 用户id
      */
@@ -22,10 +22,34 @@ public interface DriverInfoFeignClient {
     Result<Long> login(@PathVariable String code);
 
     /**
-     * 获取司机信息, 远程调用
+     * 获取司机信息
      * @param driverId 司机id
      * @return 封装司机信息的DriverLoginVo对象
      */
     @RequestMapping("/driver/info/getDriverLoginInfo/{driverId}")
     Result<DriverLoginVo> getDriverLoginInfo(@PathVariable Long driverId);
+
+    /**
+     * 回显司机认证信息
+     * @param driverId
+     * @return
+     */
+    @RequestMapping("/driver/info/getDriverAuthInfo/{driverId}")
+    Result<DriverAuthInfoVo> getDriverAuthInfo(@PathVariable Long driverId);
+
+    /**
+     * 更新司机认证信息
+     * @param updateDriverAuthInfoForm
+     * @return
+     */
+    @PostMapping("/driver/info/updateDriverAuthInfo")
+    Result<Boolean> updateDriverAuthInfo(@RequestBody UpdateDriverAuthInfoForm updateDriverAuthInfoForm);
+
+    /**
+     * 创建司机人脸模型
+     * @param driverFaceModelForm
+     * @return
+     */
+    @PostMapping("/driver/info/createDriverFaceModel")
+    Result<Boolean> createDriverFaceModel(@RequestBody DriverFaceModelForm driverFaceModelForm);
 }
