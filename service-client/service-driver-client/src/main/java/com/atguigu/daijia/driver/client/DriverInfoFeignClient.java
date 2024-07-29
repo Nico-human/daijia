@@ -52,4 +52,13 @@ public interface DriverInfoFeignClient {
      */
     @PostMapping("/driver/info/createDriverFaceModel")
     Result<Boolean> createDriverFaceModel(@RequestBody DriverFaceModelForm driverFaceModelForm);
+
+    /**
+     * 获取司机个性化设置信息(状态值: 是否可以接单, 接单里程, 订单里程等)
+     * @param driverId
+     * @return
+     */
+    @GetMapping("/driver/info/getDriverSet/{driverId}")
+    Result<DriverSet> getDriverSet(@PathVariable Long driverId);
+
 }

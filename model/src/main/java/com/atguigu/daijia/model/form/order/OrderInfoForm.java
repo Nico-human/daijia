@@ -9,7 +9,6 @@ import java.math.BigDecimal;
 @Schema(description = "OrderInfo")
 public class OrderInfoForm {
 
-
     @Schema(description = "客户ID")
 	private Long customerId;
 
