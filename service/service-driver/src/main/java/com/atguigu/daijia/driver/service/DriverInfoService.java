@@ -1,6 +1,7 @@
 package com.atguigu.daijia.driver.service;
 
 import com.atguigu.daijia.model.entity.driver.DriverInfo;
+import com.atguigu.daijia.model.entity.driver.DriverSet;
 import com.atguigu.daijia.model.form.driver.DriverFaceModelForm;
 import com.atguigu.daijia.model.form.driver.UpdateDriverAuthInfoForm;
 import com.atguigu.daijia.model.vo.driver.DriverAuthInfoVo;
@@ -36,16 +37,25 @@ public interface DriverInfoService extends IService<DriverInfo> {
     DriverAuthInfoVo getDriverAuthInfo(Long driverId);
 
     /**
-     *
+     * 更新司机登录信息
      * @param updateDriverAuthInfoForm
      * @return
      */
     Boolean updateDriverAuthInfo(UpdateDriverAuthInfoForm updateDriverAuthInfoForm);
 
     /**
-     *
+     * 请求腾讯云接口创建人脸模型, 并将返回的人脸模型id存入表中
      * @param driverFaceModelForm
      * @return
      */
     Boolean createDriverFaceModel(DriverFaceModelForm driverFaceModelForm);
+
+    /**
+     * 获取司机设置信息(状态值: 是否可以接单, 接单里程, 订单里程等)
+     * TODO 备忘录: 1. 订单里程: 司机想接的xx里程内的订单(eg: 订单里程为20表示司机想接20公里以内的订单, 订单里程为0表示无限制)
+     * TODO 备忘录: 2. 接单里程: 司机想接的订单在xx里程内(eg: 接单里程为3表示司机想接的订单需要距离他所在位置3公里以内, 接单里程为0表示无限制)
+     * @param driverId
+     * @return
+     */
+    DriverSet getDriverSet(Long driverId);
 }
