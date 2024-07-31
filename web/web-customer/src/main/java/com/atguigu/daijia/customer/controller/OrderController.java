@@ -46,7 +46,7 @@ public class OrderController {
     }
 
     @Operation(summary = "乘客下单")
-    @PutMapping("/submitOrder")  //TODO: 将前端的调用修改为PutMapping
+    @PutMapping("/submitOrder")
     @LoginAuth
     public Result<Long> submitOrder(@RequestBody SubmitOrderForm submitOrderForm){
         Long customerId = AuthContextHolder.getUserId();

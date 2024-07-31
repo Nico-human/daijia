@@ -61,4 +61,28 @@ public interface DriverInfoFeignClient {
     @GetMapping("/driver/info/getDriverSet/{driverId}")
     Result<DriverSet> getDriverSet(@PathVariable Long driverId);
 
+    /**
+     * 判断司机当日是否进行过人脸识别
+     * @param driverId
+     * @return
+     */
+    @GetMapping("driver/info/isFaceRecognition/{driverId}")
+    Result<Boolean> isFaceRecognition(@PathVariable Long driverId);
+
+    /**
+     * 验证司机人脸
+     * @param driverFaceModelForm
+     * @return
+     */
+    @PostMapping("driver/info/verifyDriverFace")
+    Result<Boolean> verifyDriverFace(@RequestBody DriverFaceModelForm driverFaceModelForm);
+
+    /**
+     * 更新司机接单状态
+     * @param driverId
+     * @param status
+     * @return
+     */
+    @PostMapping("/driver/info/updateServiceStatus/{driverId}/{status}")
+    Result<Boolean> updateServiceStatus(@PathVariable Long driverId, @PathVariable Integer status);
 }

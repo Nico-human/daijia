@@ -4,6 +4,7 @@ import com.atguigu.daijia.common.execption.GuiguException;
 import com.atguigu.daijia.common.result.Result;
 import com.atguigu.daijia.common.result.ResultCodeEnum;
 import com.atguigu.daijia.customer.service.OrderService;
+import com.atguigu.daijia.dispatch.client.NewOrderFeignClient;
 import com.atguigu.daijia.map.client.MapFeignClient;
 import com.atguigu.daijia.model.form.customer.ExpectOrderForm;
 import com.atguigu.daijia.model.form.customer.SubmitOrderForm;
@@ -11,6 +12,7 @@ import com.atguigu.daijia.model.form.map.CalculateDrivingLineForm;
 import com.atguigu.daijia.model.form.order.OrderInfoForm;
 import com.atguigu.daijia.model.form.rules.FeeRuleRequestForm;
 import com.atguigu.daijia.model.vo.customer.ExpectOrderVo;
+import com.atguigu.daijia.model.vo.dispatch.NewOrderTaskVo;
 import com.atguigu.daijia.model.vo.map.DrivingLineVo;
 import com.atguigu.daijia.model.vo.rules.FeeRuleResponseVo;
 import com.atguigu.daijia.order.client.OrderInfoFeignClient;
@@ -19,8 +21,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.math.BigDecimal;
 import java.util.Date;
 
 @Slf4j
@@ -30,17 +30,17 @@ public class OrderServiceImpl implements OrderService {
 
     @Autowired
     private MapFeignClient mapFeignClient;
-
     @Autowired
     private FeeRuleFeignClient feeRuleFeignClient;
-
     @Autowired
     private OrderInfoFeignClient orderInfoFeignClient;
+    @Autowired
+    private NewOrderFeignClient newOrderFeignClient;
 
     @Override
     public ExpectOrderVo expectOrder(ExpectOrderForm expectOrderForm) {
 
-        //获取驾驶路线
+        //1.获取驾驶路线
         CalculateDrivingLineForm calculateDrivingLineForm = new CalculateDrivingLineForm();
         BeanUtils.copyProperties(expectOrderForm, calculateDrivingLineForm);
         Result<DrivingLineVo> drivingLineVoResult = mapFeignClient.calculateDrivingLine(calculateDrivingLineForm);
@@ -50,7 +50,7 @@ public class OrderServiceImpl implements OrderService {
         }
         DrivingLineVo drivingLineVo = drivingLineVoResult.getData();
 
-        //获取订单费用
+        //2.获取订单费用
         FeeRuleRequestForm feeRuleRequestForm = new FeeRuleRequestForm();
         feeRuleRequestForm.setDistance(drivingLineVo.getDistance());
         feeRuleRequestForm.setStartTime(new Date());
@@ -61,7 +61,7 @@ public class OrderServiceImpl implements OrderService {
         }
         FeeRuleResponseVo feeRuleResponseVo = feeRuleResponseVoResult.getData();
 
-        // 封装Vo对象
+        //3.封装Vo对象
         ExpectOrderVo expectOrderVo = new ExpectOrderVo();
         expectOrderVo.setDrivingLineVo(drivingLineVo);
         expectOrderVo.setFeeRuleResponseVo(feeRuleResponseVo);
@@ -92,19 +92,31 @@ public class OrderServiceImpl implements OrderService {
         }
         FeeRuleResponseVo feeRuleResponseVo = feeRuleResponseVoResult.getData();
 
-        // 3.封装数据
+        // 3.保存订单信息
         OrderInfoForm orderInfoForm = new OrderInfoForm();
-        BeanUtils.copyProperties(feeRuleResponseVo, orderInfoForm);
+        BeanUtils.copyProperties(submitOrderForm, orderInfoForm);
         orderInfoForm.setExpectDistance(drivingLineVo.getDistance());
         orderInfoForm.setExpectAmount(feeRuleResponseVo.getTotalAmount());
         Result<Long> orderIdResult = orderInfoFeignClient.saveOrderInfo(orderInfoForm);
         if (orderIdResult.getCode() != 200) {
             throw new GuiguException(ResultCodeEnum.SERVICE_ERROR);
         }
+        Long orderId = orderIdResult.getData();
 
-        // TODO: 查询附近可以接单的司机
+        // 4. (任务调度实现)查询附近可以接单的司机
+        NewOrderTaskVo newOrderTaskVo = new NewOrderTaskVo();
+        BeanUtils.copyProperties(orderInfoForm, newOrderTaskVo);
+        newOrderTaskVo.setOrderId(orderId);
+        newOrderTaskVo.setExpectTime(drivingLineVo.getDuration());
+        newOrderTaskVo.setExpectDistance(drivingLineVo.getDistance());
+        newOrderTaskVo.setCreateTime(new Date());
+        Result<Long> jobIdResult = newOrderFeignClient.addAndStartTask(newOrderTaskVo);
+        if (jobIdResult.getCode() != 200) {
+            throw new GuiguException(ResultCodeEnum.SERVICE_ERROR);
+        }
+        Long jobId = jobIdResult.getData();
 
-        return orderIdResult.getData();
+        return orderId;
     }
 
     @Override

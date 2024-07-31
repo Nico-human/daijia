@@ -60,12 +60,45 @@ public class DriverController {
     }
 
     @Operation(summary = "创建司机人脸模型")
-    @PostMapping("/creatDriverFaceModel") //TODO 前端给的逆天接口( creat ?)
+    @PostMapping("/creatDriverFaceModel")
     @LoginAuth
     public Result<Boolean> createDriverFaceModel(@RequestBody DriverFaceModelForm driverFaceModelForm) {
         Long driverId = AuthContextHolder.getUserId();
         driverFaceModelForm.setDriverId(driverId);
         return Result.ok(driverService.createDriverFaceModel(driverFaceModelForm));
     }
+
+    @Operation(summary = "判断司机当日是否进行过人脸识别")
+    @GetMapping("/isFaceRecognition")
+    @LoginAuth
+    public Result<Boolean> isFaceRecognition() {
+        Long driverId = AuthContextHolder.getUserId();
+        return Result.ok(driverService.isFaceRecognition(driverId));
+    }
+
+    @Operation(summary = "验证司机人脸")
+    @PostMapping("/verifyDriverFace")
+    @LoginAuth
+    public Result<Boolean> verifyDriverFace(@RequestBody DriverFaceModelForm driverFaceModelForm) {
+        driverFaceModelForm.setDriverId(AuthContextHolder.getUserId());
+        return Result.ok(driverService.verifyDriverFace(driverFaceModelForm));
+    }
+
+    @Operation(summary = "司机开启接单服务")
+    @GetMapping("/startService")
+    @LoginAuth
+    public Result<Boolean> startService() {
+        Long driverId = AuthContextHolder.getUserId();
+        return Result.ok(driverService.startService(driverId));
+    }
+
+    @Operation(summary = "司机停止接单服务")
+    @GetMapping("/stopService")
+    @LoginAuth
+    public Result<Boolean> stopService() {
+        Long driverId = AuthContextHolder.getUserId();
+        return Result.ok(driverService.stopService(driverId));
+    }
+
 }
 

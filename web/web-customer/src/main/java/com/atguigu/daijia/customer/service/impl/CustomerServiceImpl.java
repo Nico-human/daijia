@@ -87,7 +87,7 @@ public class CustomerServiceImpl implements CustomerService {
 //
 //        String customerId = (String) redisTemplate.opsForValue().get(RedisConstant.USER_LOGIN_KEY_PREFIX + token);
 //        if (!StringUtils.hasText(customerId)){
-//            throw new GuiguException(ResultCodeEnum.DATA_ERROR);  // TODO: 跳转登录
+//            throw new GuiguException(ResultCodeEnum.DATA_ERROR);
 //        }
 //
 //        Result<CustomerLoginVo> customerLoginResult =

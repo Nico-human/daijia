@@ -43,4 +43,37 @@ public interface DriverService {
      * @return
      */
     Boolean createDriverFaceModel(DriverFaceModelForm driverFaceModelForm);
+
+    /**
+     * 判断司机当日是否进行过人脸识别
+     * @param driverId
+     * @return
+     */
+    Boolean isFaceRecognition(Long driverId);
+
+    /**
+     * 验证司机人脸
+     * @param driverFaceModelForm
+     * @return
+     */
+    Boolean verifyDriverFace(DriverFaceModelForm driverFaceModelForm);
+
+    /**
+     * 开启接单, 更新司机接单状态, 删除司机在redis中的位置信息, 清空司机临时队列数据
+     *
+     * 成功开启接单的条件:
+     * 1. 登录(Controller已经通过自定义注解校验过)
+     * 2. 是否完成了认证
+     * 3. 是否完成当日人脸识别
+     * @param driverId
+     * @return
+     */
+    Boolean startService(Long driverId);
+
+    /**
+     * 司机停止接单
+     * @param driverId
+     * @return
+     */
+    Boolean stopService(Long driverId);
 }

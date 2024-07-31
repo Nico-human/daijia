@@ -52,10 +52,32 @@ public interface DriverInfoService extends IService<DriverInfo> {
 
     /**
      * 获取司机设置信息(状态值: 是否可以接单, 接单里程, 订单里程等)
-     * TODO 备忘录: 1. 订单里程: 司机想接的xx里程内的订单(eg: 订单里程为20表示司机想接20公里以内的订单, 订单里程为0表示无限制)
-     * TODO 备忘录: 2. 接单里程: 司机想接的订单在xx里程内(eg: 接单里程为3表示司机想接的订单需要距离他所在位置3公里以内, 接单里程为0表示无限制)
+     * 备忘录: 1. 订单里程: 司机想接的xx里程内的订单(eg: 订单里程为20表示司机想接20公里以内的订单, 订单里程为0表示无限制)
+     * 备忘录: 2. 接单里程: 司机想接的订单在xx里程内(eg: 接单里程为3表示司机想接的订单需要距离他所在位置3公里以内, 接单里程为0表示无限制)
      * @param driverId
      * @return
      */
     DriverSet getDriverSet(Long driverId);
+
+    /**
+     * 判断司机当日是否进行过人脸识别
+     * @param driverId
+     * @return true: 当日识别过, false: 当日没有识别
+     */
+    Boolean isFaceRecognition(Long driverId);
+
+    /**
+     * 调用腾讯云人脸识别服务, 进行人脸识别
+     * @param driverFaceModelForm
+     * @return
+     */
+    Boolean verifyDriverFace(DriverFaceModelForm driverFaceModelForm);
+
+    /**
+     * 更新司机接单状态
+     * @param driverId
+     * @param status
+     * @return
+     */
+    Boolean updateServiceStatus(Long driverId, Integer status);
 }

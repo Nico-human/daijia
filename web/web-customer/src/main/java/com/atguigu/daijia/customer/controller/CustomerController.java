@@ -43,7 +43,7 @@ public class CustomerController {
     public Result<Boolean> updateWxPhone(@RequestBody UpdateWxPhoneForm updateWxPhoneForm) {
         updateWxPhoneForm.setCustomerId(AuthContextHolder.getUserId());
 //        Boolean result = customerService.updateWxPhoneNumber(updateWxPhoneForm);
-        return Result.ok(true); // TODO: 企业微信个人版无法测试
+        return Result.ok(true);
     }
 
 //    @Operation(summary = "获取客户登录信息")
