@@ -94,7 +94,7 @@ public class OrderServiceImpl implements OrderService {
 
         // 3.保存订单信息
         OrderInfoForm orderInfoForm = new OrderInfoForm();
-        BeanUtils.copyProperties(feeRuleResponseVo, orderInfoForm);
+        BeanUtils.copyProperties(submitOrderForm, orderInfoForm);
         orderInfoForm.setExpectDistance(drivingLineVo.getDistance());
         orderInfoForm.setExpectAmount(feeRuleResponseVo.getTotalAmount());
         Result<Long> orderIdResult = orderInfoFeignClient.saveOrderInfo(orderInfoForm);
@@ -108,6 +108,7 @@ public class OrderServiceImpl implements OrderService {
         BeanUtils.copyProperties(orderInfoForm, newOrderTaskVo);
         newOrderTaskVo.setOrderId(orderId);
         newOrderTaskVo.setExpectTime(drivingLineVo.getDuration());
+        newOrderTaskVo.setExpectDistance(drivingLineVo.getDistance());
         newOrderTaskVo.setCreateTime(new Date());
         Result<Long> jobIdResult = newOrderFeignClient.addAndStartTask(newOrderTaskVo);
         if (jobIdResult.getCode() != 200) {

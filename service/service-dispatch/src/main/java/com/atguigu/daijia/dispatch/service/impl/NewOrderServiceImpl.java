@@ -53,10 +53,10 @@ public class NewOrderServiceImpl implements NewOrderService {
 
         //2. 没有开启，则开启任务调度
         if (orderJob == null) {
-            Long jobId = xxlJobClient.addJob("newOrderTaskHandler", //具体JobHandler方法
+            Long jobId = xxlJobClient.addAndStart("newOrderTaskHandler",
                                             "",
-                                            "0 0/1 * * * ?", // cron表达式
-                                            "新创建订单任务调度： " + newOrderTaskVo.getOrderId());
+                                            "0 0/1 * * * ?",
+                                            "新创建订单任务调度: " + newOrderTaskVo.getOrderId());
 
             orderJob = new OrderJob();
             orderJob.setOrderId(newOrderTaskVo.getOrderId());

@@ -65,4 +65,19 @@ public interface DriverInfoService extends IService<DriverInfo> {
      * @return true: 当日识别过, false: 当日没有识别
      */
     Boolean isFaceRecognition(Long driverId);
+
+    /**
+     * 调用腾讯云人脸识别服务, 进行人脸识别
+     * @param driverFaceModelForm
+     * @return
+     */
+    Boolean verifyDriverFace(DriverFaceModelForm driverFaceModelForm);
+
+    /**
+     * 更新司机接单状态
+     * @param driverId
+     * @param status
+     * @return
+     */
+    Boolean updateServiceStatus(Long driverId, Integer status);
 }

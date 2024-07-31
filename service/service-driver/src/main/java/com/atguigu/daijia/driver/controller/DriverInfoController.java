@@ -69,5 +69,17 @@ public class DriverInfoController {
         return Result.ok(driverInfoService.isFaceRecognition(driverId));
     }
 
+    @Operation(summary = "验证司机人脸")
+    @PostMapping("/verifyDriverFace")
+    public Result<Boolean> verifyDriverFace(@RequestBody DriverFaceModelForm driverFaceModelForm) {
+        return Result.ok(driverInfoService.verifyDriverFace(driverFaceModelForm));
+    }
+
+    @Operation(summary = "更新司机接单状态")
+    @PostMapping("updateServiceStatus/{driverId}/{status}")
+    public Result<Boolean> updateServiceStatus(@PathVariable Long driverId, @PathVariable Integer status) {
+        return Result.ok(driverInfoService.updateServiceStatus(driverId, status));
+    }
+
 }
 

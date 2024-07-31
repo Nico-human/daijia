@@ -5,6 +5,7 @@ import com.atguigu.daijia.dispatch.service.NewOrderService;
 import com.atguigu.daijia.model.entity.dispatch.XxlJobLog;
 import com.xxl.job.core.context.XxlJobHelper;
 import com.xxl.job.core.handler.annotation.XxlJob;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -14,11 +15,11 @@ import org.springframework.stereotype.Component;
  * @Date: 2024/7/30
  */
 @Component
+@Slf4j
 public class JobHandler {
 
     @Autowired
     private NewOrderService newOrderService;
-
     @Autowired
     private XxlJobLogMapper xxlJobLogMapper;
 
@@ -30,6 +31,8 @@ public class JobHandler {
         long startTime = System.currentTimeMillis();
 
         try {
+            log.info("执行任务");
+            System.out.println("执行任务");
             //执行任务
             newOrderService.executeTask(XxlJobHelper.getJobId());
             xxlJobLog.setStatus(1); // 设置任务状态 1: 已完成

@@ -142,6 +142,7 @@ public class XxlJobClient {
         httpHeaders.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<XxlJobInfo> request = new HttpEntity<>(xxlJobInfo, httpHeaders);
         String url = xxlJobClientConfig.getAddAndStartUrl();
+        // 通过请求调度中心(xxlJob源码)添加调度任务, 并启动调度任务
         ResponseEntity<JSONObject> response = restTemplate.postForEntity(url, request, JSONObject.class);
 
         if(response.getStatusCode().value() == 200 && Objects.requireNonNull(response.getBody()).getIntValue("code") == 200) {
