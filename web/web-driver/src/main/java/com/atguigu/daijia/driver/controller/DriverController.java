@@ -60,7 +60,7 @@ public class DriverController {
     }
 
     @Operation(summary = "创建司机人脸模型")
-    @PostMapping("/creatDriverFaceModel") //TODO 前端给的逆天接口( creat ?)
+    @PostMapping("/creatDriverFaceModel")
     @LoginAuth
     public Result<Boolean> createDriverFaceModel(@RequestBody DriverFaceModelForm driverFaceModelForm) {
         Long driverId = AuthContextHolder.getUserId();

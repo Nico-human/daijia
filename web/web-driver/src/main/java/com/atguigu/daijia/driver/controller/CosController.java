@@ -23,7 +23,7 @@ public class CosController {
 
     @Operation(summary = "上传")
     @PostMapping("/upload")
-    @LoginAuth //TODO 测试时注释掉
+    @LoginAuth
     public Result<CosUploadVo> upload(@RequestPart("file") MultipartFile file,
                                       @RequestParam(name = "path", defaultValue = "auth") String path) {
         CosUploadVo cosUploadVo = cosService.uploadFile(file, path);

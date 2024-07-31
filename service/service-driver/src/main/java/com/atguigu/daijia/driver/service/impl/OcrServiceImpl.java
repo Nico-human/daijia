@@ -134,8 +134,7 @@ public class OcrServiceImpl implements OcrService {
             CosUploadVo cosUploadVo = cosService.upload(file, "driverLicense");
             driverLicenseOcrVo.setDriverLicenseFrontUrl(cosUploadVo.getUrl());
             driverLicenseOcrVo.setDriverLicenseFrontShowUrl(cosUploadVo.getShowUrl());
-            //TODO 判断驾照 正副页的逻辑必须在传入腾讯云接口之前,
-            // 因为腾讯云默认识别主页(参数cardSide="FRONT"), 所以这个接口只能识别驾照主页(识别副页需要另写一个接口, 前端没写)
+            // 判断驾照 正副页的逻辑必须在传入腾讯云接口之前, 因为腾讯云默认识别主页(参数cardSide="FRONT"), 所以这个接口只能识别驾照主页(识别副页需要另写一个接口, 前端没写)
 
 //            else{
 //                //上传驾驶证正面到腾讯云cos

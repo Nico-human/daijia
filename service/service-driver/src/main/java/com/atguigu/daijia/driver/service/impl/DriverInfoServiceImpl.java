@@ -6,16 +6,10 @@ import com.atguigu.daijia.common.constant.SystemConstant;
 import com.atguigu.daijia.common.execption.GuiguException;
 import com.atguigu.daijia.common.result.ResultCodeEnum;
 import com.atguigu.daijia.driver.config.TencentCloudProperties;
-import com.atguigu.daijia.driver.mapper.DriverAccountMapper;
-import com.atguigu.daijia.driver.mapper.DriverInfoMapper;
-import com.atguigu.daijia.driver.mapper.DriverLoginLogMapper;
-import com.atguigu.daijia.driver.mapper.DriverSetMapper;
+import com.atguigu.daijia.driver.mapper.*;
 import com.atguigu.daijia.driver.service.CosService;
 import com.atguigu.daijia.driver.service.DriverInfoService;
-import com.atguigu.daijia.model.entity.driver.DriverAccount;
-import com.atguigu.daijia.model.entity.driver.DriverInfo;
-import com.atguigu.daijia.model.entity.driver.DriverLoginLog;
-import com.atguigu.daijia.model.entity.driver.DriverSet;
+import com.atguigu.daijia.model.entity.driver.*;
 import com.atguigu.daijia.model.form.driver.DriverFaceModelForm;
 import com.atguigu.daijia.model.form.driver.UpdateDriverAuthInfoForm;
 import com.atguigu.daijia.model.vo.driver.DriverAuthInfoVo;
@@ -57,6 +51,8 @@ public class DriverInfoServiceImpl extends ServiceImpl<DriverInfoMapper, DriverI
     private DriverLoginLogMapper driverLoginLogMapper;
     @Autowired
     private TencentCloudProperties tencentCloudProperties;
+    @Autowired
+    private DriverFaceRecognitionMapper driverFaceRecognitionMapper;
 
     @Override
     public Long login(String code) {
@@ -201,6 +197,17 @@ public class DriverInfoServiceImpl extends ServiceImpl<DriverInfoMapper, DriverI
         LambdaQueryWrapper<DriverSet> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(DriverSet::getDriverId, driverId);
         return driverSetMapper.selectOne(queryWrapper);
+    }
+
+    @Override
+    public Boolean isFaceRecognition(Long driverId) {
+        LambdaQueryWrapper<DriverFaceRecognition> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(DriverFaceRecognition::getDriverId, driverId);
+        DriverFaceRecognition driverFaceRecognition = driverFaceRecognitionMapper.selectOne(queryWrapper);
+        if (driverFaceRecognition == null || driverFaceRecognition.getFaceDate() != ) {
+            return false;
+        }
+        return true;
     }
 
 }
