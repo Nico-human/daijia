@@ -25,4 +25,13 @@ public interface OrderInfoFeignClient {
     @GetMapping("/order/info/getOrderStatus/{orderId}")
     Result<Integer> getOrderStatus(@PathVariable Long orderId);
 
+    /**
+     * 司机抢单(通过redisson分布式锁实现分布式线程安全)
+     * @param driverId
+     * @param orderId
+     * @return
+     */
+    @GetMapping("/order/info/robNewOrder/{driverId}/{orderId}")
+    Result<Boolean> robNewOrder(@PathVariable Long driverId, @PathVariable Long orderId);
+
 }

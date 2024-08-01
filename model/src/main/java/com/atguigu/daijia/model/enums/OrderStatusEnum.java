@@ -4,7 +4,7 @@ import com.baomidou.mybatisplus.annotation.EnumValue;
 import lombok.Getter;
 
 @Getter
-public enum OrderStatus {
+public enum OrderStatusEnum {
     WAITING_ACCEPT(1, "等待接单"),
     ACCEPTED(2, "已接单"),
     DRIVER_ARRIVED(3, "司机已到达"),
@@ -22,7 +22,7 @@ public enum OrderStatus {
     private Integer status;
     private String comment;
 
-    OrderStatus(Integer status, String comment) {
+    OrderStatusEnum(Integer status, String comment) {
         this.status = status;
         this.comment = comment;
     }
