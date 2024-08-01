@@ -145,7 +145,7 @@ public class XxlJobClient {
         // 通过请求调度中心(xxlJob源码)添加调度任务, 并启动调度任务
         ResponseEntity<JSONObject> response = restTemplate.postForEntity(url, request, JSONObject.class);
 
-        if(response.getStatusCode().value() == 200 && Objects.requireNonNull(response.getBody()).getIntValue("code") == 200) {
+        if (response.getStatusCode().value() == 200 && Objects.requireNonNull(response.getBody()).getIntValue("code") == 200) {
             log.info("增加并开始执行xxljob成功, 返回信息: {}", response.getBody().toJSONString());
             return response.getBody().getLong("content");
         }

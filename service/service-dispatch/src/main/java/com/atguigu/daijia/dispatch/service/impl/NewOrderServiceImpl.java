@@ -10,7 +10,7 @@ import com.atguigu.daijia.dispatch.service.NewOrderService;
 import com.atguigu.daijia.dispatch.xxl.client.XxlJobClient;
 import com.atguigu.daijia.map.client.LocationFeignClient;
 import com.atguigu.daijia.model.entity.dispatch.OrderJob;
-import com.atguigu.daijia.model.enums.OrderStatus;
+import com.atguigu.daijia.model.enums.OrderStatusEnum;
 import com.atguigu.daijia.model.form.map.SearchNearByDriverForm;
 import com.atguigu.daijia.model.vo.dispatch.NewOrderTaskVo;
 import com.atguigu.daijia.model.vo.map.NearByDriverVo;
@@ -20,7 +20,6 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -87,7 +86,7 @@ public class NewOrderServiceImpl implements NewOrderService {
             throw new GuiguException(ResultCodeEnum.FEIGN_FAIL);
         }
         Integer status = orderStatusResult.getData();
-        if (status.intValue() != OrderStatus.WAITING_ACCEPT.getStatus()) {
+        if (status.intValue() != OrderStatusEnum.WAITING_ACCEPT.getStatus()) {
             xxlJobClient.stopJob(jobId); // 订单不是待接单状态, 停止此任务
             return;
         }

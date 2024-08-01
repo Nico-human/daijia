@@ -49,5 +49,14 @@ public class OrderController {
         currentOrderInfoVo.setIsHasCurrentOrder(false); //TODO: 后续完善, 目前默认司机当前没有正在执行的订单
         return Result.ok(currentOrderInfoVo);
     }
+
+    @Operation(summary = "司机抢单")
+    @GetMapping("/robNewOrder/{orderId}")
+    @LoginAuth
+    public Result<Boolean> robNewOrder(@PathVariable Long orderId) {
+        Long driverId = AuthContextHolder.getUserId();
+        return Result.ok(orderService.robNewOrder(driverId, orderId));
+    }
+
 }
 

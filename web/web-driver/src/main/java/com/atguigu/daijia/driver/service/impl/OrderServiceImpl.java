@@ -41,4 +41,13 @@ public class OrderServiceImpl implements OrderService {
         return listResult.getData();
     }
 
+    @Override
+    public Boolean robNewOrder(Long driverId, Long orderId) {
+        Result<Boolean> result = orderInfoFeignClient.robNewOrder(driverId, orderId);
+        if (result.getCode() != 200) {
+            throw new GuiguException(ResultCodeEnum.COB_NEW_ORDER_FAIL);
+        }
+        return result.getData();
+    }
+
 }
