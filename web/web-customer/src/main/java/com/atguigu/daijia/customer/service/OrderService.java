@@ -2,7 +2,11 @@ package com.atguigu.daijia.customer.service;
 
 import com.atguigu.daijia.model.form.customer.ExpectOrderForm;
 import com.atguigu.daijia.model.form.customer.SubmitOrderForm;
+import com.atguigu.daijia.model.form.map.CalculateDrivingLineForm;
 import com.atguigu.daijia.model.vo.customer.ExpectOrderVo;
+import com.atguigu.daijia.model.vo.driver.DriverInfoVo;
+import com.atguigu.daijia.model.vo.map.DrivingLineVo;
+import com.atguigu.daijia.model.vo.map.OrderLocationVo;
 import com.atguigu.daijia.model.vo.order.CurrentOrderInfoVo;
 import com.atguigu.daijia.model.vo.order.OrderInfoVo;
 
@@ -47,4 +51,26 @@ public interface OrderService {
      * @return
      */
     OrderInfoVo getOrderInfo(Long orderId, Long customerId);
+
+    /**
+     * 司乘同显: 乘客根据订单Id获取司机基本信息
+     * @param orderId
+     * @param customerId
+     * @return
+     */
+    DriverInfoVo getDriverInfo(Long orderId, Long customerId);
+
+    /**
+     * 司乘同显: 乘客获取订单经纬度信息
+     * @param orderId
+     * @return
+     */
+    OrderLocationVo getCacheOrderLocation(Long orderId);
+
+    /**
+     * 司乘同显: 计算最佳驾驶线路
+     * @param calculateDrivingLineForm
+     * @return
+     */
+    DrivingLineVo calculateDrivingLine(CalculateDrivingLineForm calculateDrivingLineForm);
 }

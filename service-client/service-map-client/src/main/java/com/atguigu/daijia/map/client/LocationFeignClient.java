@@ -3,7 +3,9 @@ package com.atguigu.daijia.map.client;
 import com.atguigu.daijia.common.result.Result;
 import com.atguigu.daijia.model.form.map.SearchNearByDriverForm;
 import com.atguigu.daijia.model.form.map.UpdateDriverLocationForm;
+import com.atguigu.daijia.model.form.map.UpdateOrderLocationForm;
 import com.atguigu.daijia.model.vo.map.NearByDriverVo;
+import com.atguigu.daijia.model.vo.map.OrderLocationVo;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
 
@@ -35,4 +37,20 @@ public interface LocationFeignClient {
      */
     @PostMapping("/map/location/searchNearByDriver")
     Result<List<NearByDriverVo>> searchNearByDriver(@RequestBody SearchNearByDriverForm searchNearByDriverForm);
+
+    /**
+     * 司机赶往代驾起点, 更新订单位置到redis缓存中
+     * @param updateOrderLocationForm
+     * @return
+     */
+    @PostMapping("/map/location/updateOrderLocationToCache")
+    Result<Boolean> updateOrderLocationToCache(@RequestBody UpdateOrderLocationForm updateOrderLocationForm);
+
+    /**
+     * 司乘同显: 获取订单经纬度信息
+     * @param orderId
+     * @return
+     */
+    @GetMapping("/map/location/getCacheOrderLocation/{orderId}")
+    Result<OrderLocationVo> getCacheOrderLocation(@PathVariable Long orderId);
 }

@@ -4,7 +4,9 @@ import com.atguigu.daijia.common.result.Result;
 import com.atguigu.daijia.map.service.LocationService;
 import com.atguigu.daijia.model.form.map.SearchNearByDriverForm;
 import com.atguigu.daijia.model.form.map.UpdateDriverLocationForm;
+import com.atguigu.daijia.model.form.map.UpdateOrderLocationForm;
 import com.atguigu.daijia.model.vo.map.NearByDriverVo;
+import com.atguigu.daijia.model.vo.map.OrderLocationVo;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
@@ -42,5 +44,16 @@ public class LocationController {
         return Result.ok(locationService.searchNearByDriver(searchNearByDriverForm));
     }
 
+    @Operation(summary = "司机赶往代驾起点, 更新订单位置到redis缓存中")
+    @PostMapping("/updateOrderLocationToCache")
+    public Result<Boolean> updateOrderLocationToCache(@RequestBody UpdateOrderLocationForm updateOrderLocationForm) {
+        return Result.ok(locationService.updateOrderLocationToCache(updateOrderLocationForm));
+    }
+
+    @Operation(summary = "司乘同显: 获取订单经纬度信息")
+    @GetMapping("/getCacheOrderLocation/{orderId}")
+    public Result<OrderLocationVo> getCacheOrderLocation(@PathVariable Long orderId) {
+        return Result.ok(locationService.getCacheOrderLocation(orderId));
+    }
 
 }

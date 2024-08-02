@@ -13,6 +13,7 @@ import com.atguigu.daijia.model.entity.driver.*;
 import com.atguigu.daijia.model.form.driver.DriverFaceModelForm;
 import com.atguigu.daijia.model.form.driver.UpdateDriverAuthInfoForm;
 import com.atguigu.daijia.model.vo.driver.DriverAuthInfoVo;
+import com.atguigu.daijia.model.vo.driver.DriverInfoVo;
 import com.atguigu.daijia.model.vo.driver.DriverLoginVo;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
@@ -297,5 +298,18 @@ public class DriverInfoServiceImpl extends ServiceImpl<DriverInfoMapper, DriverI
         return updated > 0;
     }
 
+    @Override
+    public DriverInfoVo getDriverInfoOrder(Long driverId) {
+        DriverInfo driverInfo = driverInfoMapper.selectById(driverId);
+        DriverInfoVo driverInfoVo = new DriverInfoVo();
+        BeanUtils.copyProperties(driverInfo, driverInfoVo);
+
+        // 计算驾龄
+        int currentYear = new DateTime().getYear();
+        int driverLicenseYear = new DateTime(driverInfo.getDriverLicenseIssueDate()).getYear();
+        driverInfoVo.setDriverLicenseAge(currentYear - driverLicenseYear);
+
+        return driverInfoVo;
+    }
 
 }
