@@ -5,9 +5,13 @@ import com.atguigu.daijia.common.result.Result;
 import com.atguigu.daijia.common.result.ResultCodeEnum;
 import com.atguigu.daijia.dispatch.client.NewOrderFeignClient;
 import com.atguigu.daijia.driver.service.OrderService;
+import com.atguigu.daijia.model.entity.order.OrderInfo;
+import com.atguigu.daijia.model.vo.order.CurrentOrderInfoVo;
 import com.atguigu.daijia.model.vo.order.NewOrderDataVo;
+import com.atguigu.daijia.model.vo.order.OrderInfoVo;
 import com.atguigu.daijia.order.client.OrderInfoFeignClient;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -48,6 +52,34 @@ public class OrderServiceImpl implements OrderService {
             throw new GuiguException(ResultCodeEnum.COB_NEW_ORDER_FAIL);
         }
         return result.getData();
+    }
+
+    @Override
+    public CurrentOrderInfoVo searchDriverCurrentOrder(Long driverId) {
+        Result<CurrentOrderInfoVo> result = orderInfoFeignClient.searchDriverCurrentOrder(driverId);
+        if (result.getCode() != 200) {
+            throw new GuiguException(ResultCodeEnum.FEIGN_FAIL);
+        }
+        return result.getData();
+    }
+
+    @Override
+    public OrderInfoVo getOrderInfo(Long orderId, Long driverId) {
+        Result<OrderInfo> orderInfoResult = orderInfoFeignClient.getOrderInfo(orderId);
+        if (orderInfoResult.getCode() != 200) {
+            throw new GuiguException(ResultCodeEnum.FEIGN_FAIL);
+        }
+        OrderInfo orderInfo = orderInfoResult.getData();
+
+        if (!driverId.equals(orderInfo.getDriverId())) {
+            throw new GuiguException(ResultCodeEnum.ILLEGAL_REQUEST);
+        }
+
+        OrderInfoVo orderInfoVo = new OrderInfoVo();
+        orderInfoVo.setOrderId(orderId);
+        BeanUtils.copyProperties(orderInfo, orderInfoVo);
+
+        return orderInfoVo;
     }
 
 }

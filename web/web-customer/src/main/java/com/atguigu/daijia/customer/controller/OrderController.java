@@ -10,6 +10,7 @@ import com.atguigu.daijia.model.form.order.OrderInfoForm;
 import com.atguigu.daijia.model.form.rules.FeeRuleRequestForm;
 import com.atguigu.daijia.model.vo.customer.ExpectOrderVo;
 import com.atguigu.daijia.model.vo.order.CurrentOrderInfoVo;
+import com.atguigu.daijia.model.vo.order.OrderInfoVo;
 import com.atguigu.daijia.model.vo.rules.FeeRuleResponseVo;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -26,16 +27,6 @@ public class OrderController {
 
     @Autowired
     private OrderService orderService;
-
-    //TODO 后续完善, 目前假设乘客当前没有订单
-    @Operation(summary = "查找乘客端当前订单")
-    @GetMapping("/searchCustomerCurrentOrder")
-    @LoginAuth
-    public Result<CurrentOrderInfoVo> searchCustomerCurrentOrder(){
-        CurrentOrderInfoVo currentOrderInfoVo = new CurrentOrderInfoVo();
-        currentOrderInfoVo.setIsHasCurrentOrder(false);
-        return Result.ok(currentOrderInfoVo);
-    }
 
     @Operation(summary = "预估订单数据")
     @PostMapping("/expectOrder")
@@ -59,6 +50,22 @@ public class OrderController {
     @LoginAuth
     public Result<Integer> getOrderStatus(@PathVariable Long orderId) {
         return Result.ok(orderService.getOrderStatus(orderId));
+    }
+
+    @Operation(summary = "乘客端查找当前订单")
+    @GetMapping("/searchCustomerCurrentOrder")
+    @LoginAuth
+    public Result<CurrentOrderInfoVo> searchCustomerCurrentOrder() {
+        Long customerId = AuthContextHolder.getUserId();
+        return Result.ok(orderService.searchCustomerCurrentOrder(customerId));
+    }
+
+    @Operation(summary = "乘客端获取订单信息")
+    @GetMapping("/getOrderInfo/{orderId}")
+    @LoginAuth
+    public Result<OrderInfoVo> getOrderInfo(@PathVariable Long orderId) {
+        Long customerId = AuthContextHolder.getUserId();
+        return Result.ok(orderService.getOrderInfo(orderId, customerId));
     }
 
 }

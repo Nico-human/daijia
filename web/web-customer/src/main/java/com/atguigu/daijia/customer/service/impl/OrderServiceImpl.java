@@ -6,6 +6,7 @@ import com.atguigu.daijia.common.result.ResultCodeEnum;
 import com.atguigu.daijia.customer.service.OrderService;
 import com.atguigu.daijia.dispatch.client.NewOrderFeignClient;
 import com.atguigu.daijia.map.client.MapFeignClient;
+import com.atguigu.daijia.model.entity.order.OrderInfo;
 import com.atguigu.daijia.model.form.customer.ExpectOrderForm;
 import com.atguigu.daijia.model.form.customer.SubmitOrderForm;
 import com.atguigu.daijia.model.form.map.CalculateDrivingLineForm;
@@ -14,6 +15,8 @@ import com.atguigu.daijia.model.form.rules.FeeRuleRequestForm;
 import com.atguigu.daijia.model.vo.customer.ExpectOrderVo;
 import com.atguigu.daijia.model.vo.dispatch.NewOrderTaskVo;
 import com.atguigu.daijia.model.vo.map.DrivingLineVo;
+import com.atguigu.daijia.model.vo.order.CurrentOrderInfoVo;
+import com.atguigu.daijia.model.vo.order.OrderInfoVo;
 import com.atguigu.daijia.model.vo.rules.FeeRuleResponseVo;
 import com.atguigu.daijia.order.client.OrderInfoFeignClient;
 import com.atguigu.daijia.rules.client.FeeRuleFeignClient;
@@ -126,5 +129,32 @@ public class OrderServiceImpl implements OrderService {
             throw new GuiguException(ResultCodeEnum.SERVICE_ERROR);
         }
         return orderStatusResult.getData();
+    }
+
+    @Override
+    public CurrentOrderInfoVo searchCustomerCurrentOrder(Long customerId) {
+        Result<CurrentOrderInfoVo> currentOrderInfoVoResult = orderInfoFeignClient.searchCustomerCurrentOrder(customerId);
+        if (currentOrderInfoVoResult.getCode() != 200) {
+            throw new GuiguException(ResultCodeEnum.FEIGN_FAIL);
+        }
+        return currentOrderInfoVoResult.getData();
+    }
+
+    @Override
+    public OrderInfoVo getOrderInfo(Long orderId, Long customerId) {
+        Result<OrderInfo> orderInfoResult = orderInfoFeignClient.getOrderInfo(orderId);
+        if (orderInfoResult.getCode() != 200) {
+            throw new GuiguException(ResultCodeEnum.FEIGN_FAIL);
+        }
+        OrderInfo orderInfo = orderInfoResult.getData();
+
+        if (!customerId.equals(orderInfo.getCustomerId())) {
+            throw  new GuiguException(ResultCodeEnum.ILLEGAL_REQUEST);
+        }
+
+        OrderInfoVo orderInfoVo = new OrderInfoVo();
+        orderInfoVo.setOrderId(orderId);
+        BeanUtils.copyProperties(orderInfo, orderInfoVo);
+        return orderInfoVo;
     }
 }

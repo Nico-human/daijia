@@ -7,6 +7,7 @@ import com.atguigu.daijia.model.entity.order.OrderInfo;
 import com.atguigu.daijia.model.entity.order.OrderStatusLog;
 import com.atguigu.daijia.model.enums.OrderStatusEnum;
 import com.atguigu.daijia.model.form.order.OrderInfoForm;
+import com.atguigu.daijia.model.vo.order.CurrentOrderInfoVo;
 import com.atguigu.daijia.order.mapper.OrderInfoMapper;
 import com.atguigu.daijia.order.mapper.OrderStatusLogMapper;
 import com.atguigu.daijia.order.service.OrderInfoService;
@@ -21,6 +22,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -121,6 +123,68 @@ public class OrderInfoServiceImpl extends ServiceImpl<OrderInfoMapper, OrderInfo
         }
         return true;
     }
+
+    @Override
+    public CurrentOrderInfoVo searchCustomerCurrentOrder(Long customerId) {
+
+        LambdaQueryWrapper<OrderInfo> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(OrderInfo::getCustomerId, customerId);
+
+        Integer[] statusArray = {
+                OrderStatusEnum.ACCEPTED.getStatus(),
+                OrderStatusEnum.DRIVER_ARRIVED.getStatus(),
+                OrderStatusEnum.UPDATE_CART_INFO.getStatus(),
+                OrderStatusEnum.START_SERVICE.getStatus(),
+                OrderStatusEnum.END_SERVICE.getStatus(),
+                OrderStatusEnum.UNPAID.getStatus()
+        };
+        queryWrapper.in(OrderInfo::getStatus, statusArray);
+        queryWrapper.orderByDesc(OrderInfo::getId);
+        queryWrapper.last("limit 1");
+        // select * from order_info where customer_id = ? and status in (?, ?, ?...) order by id DESC limit 1;
+        OrderInfo orderInfo = orderInfoMapper.selectOne(queryWrapper);
+
+        CurrentOrderInfoVo currentOrderInfoVo = new CurrentOrderInfoVo();
+        if (orderInfo != null) {
+            currentOrderInfoVo.setOrderId(orderInfo.getId());
+            currentOrderInfoVo.setStatus(orderInfo.getStatus());
+            currentOrderInfoVo.setIsHasCurrentOrder(true);
+        } else {
+            currentOrderInfoVo.setIsHasCurrentOrder(false);
+        }
+        return currentOrderInfoVo;
+    }
+
+    @Override
+    public CurrentOrderInfoVo searchDriverCurrentOrder(Long driverId) {
+
+        LambdaQueryWrapper<OrderInfo> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(OrderInfo::getDriverId, driverId);
+
+        Integer[] statusArray = {
+                OrderStatusEnum.ACCEPTED.getStatus(),
+                OrderStatusEnum.DRIVER_ARRIVED.getStatus(),
+                OrderStatusEnum.UPDATE_CART_INFO.getStatus(),
+                OrderStatusEnum.START_SERVICE.getStatus(),
+                OrderStatusEnum.END_SERVICE.getStatus()
+        };
+        queryWrapper.in(OrderInfo::getStatus, statusArray);
+        queryWrapper.orderByDesc(OrderInfo::getId);
+        queryWrapper.last("limit 1");
+        // select * from order_info where driver_id = ? and status in (?, ?, ?...) order by id DESC limit 1;
+        OrderInfo orderInfo = orderInfoMapper.selectOne(queryWrapper);
+
+        CurrentOrderInfoVo currentOrderInfoVo = new CurrentOrderInfoVo();
+        if (orderInfo != null) {
+            currentOrderInfoVo.setOrderId(orderInfo.getId());
+            currentOrderInfoVo.setStatus(orderInfo.getStatus());
+            currentOrderInfoVo.setIsHasCurrentOrder(true);
+        } else {
+            currentOrderInfoVo.setIsHasCurrentOrder(false);
+        }
+        return currentOrderInfoVo;
+    }
+
 
 //    public void log(Long orderId, Integer status){
 //        OrderStatusLog orderStatusLog = new OrderStatusLog();
