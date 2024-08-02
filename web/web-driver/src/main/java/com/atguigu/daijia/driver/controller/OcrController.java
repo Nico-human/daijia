@@ -27,14 +27,14 @@ public class OcrController {
 
     @Operation(summary = "身份证识别")
     @PostMapping("/idCardOcr")
-    @LoginAuth // TODO 测试时注释掉
+    @LoginAuth
     public Result<IdCardOcrVo> uploadIdCardOcr(@RequestPart("file") MultipartFile file) {
        return Result.ok(ocrService.idCardOcr(file));
     }
 
     @Operation(summary = "驾驶证识别")
     @PostMapping("/driverLicenseOcr")
-//    @LoginAuth //TODO 测试时注释掉
+    @LoginAuth
     public Result<DriverLicenseOcrVo> uploadDriverLicenseOcr(@RequestPart("file") MultipartFile file) {
         return Result.ok(ocrService.driverLicenseOcr(file));
     }

@@ -2,13 +2,17 @@ package com.atguigu.daijia.map.service.impl;
 
 import com.atguigu.daijia.common.constant.RedisConstant;
 import com.atguigu.daijia.common.constant.SystemConstant;
+import com.atguigu.daijia.common.execption.GuiguException;
 import com.atguigu.daijia.common.result.Result;
+import com.atguigu.daijia.common.result.ResultCodeEnum;
 import com.atguigu.daijia.driver.client.DriverInfoFeignClient;
 import com.atguigu.daijia.map.service.LocationService;
 import com.atguigu.daijia.model.entity.driver.DriverSet;
 import com.atguigu.daijia.model.form.map.SearchNearByDriverForm;
 import com.atguigu.daijia.model.form.map.UpdateDriverLocationForm;
+import com.atguigu.daijia.model.form.map.UpdateOrderLocationForm;
 import com.atguigu.daijia.model.vo.map.NearByDriverVo;
+import com.atguigu.daijia.model.vo.map.OrderLocationVo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.geo.*;
@@ -21,6 +25,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Service
@@ -128,5 +133,29 @@ public class LocationServiceImpl implements LocationService {
         return nearByDriverVos;
     }
 
+    @Override
+    public Boolean updateOrderLocationToCache(UpdateOrderLocationForm updateOrderLocationForm) {
 
+        OrderLocationVo orderLocationVo = new OrderLocationVo();
+        orderLocationVo.setLatitude(updateOrderLocationForm.getLatitude());
+        orderLocationVo.setLongitude(updateOrderLocationForm.getLongitude());
+
+        String key = RedisConstant.UPDATE_ORDER_LOCATION + updateOrderLocationForm.getOrderId();
+
+        redisTemplate.opsForValue().set(key, orderLocationVo, 60, TimeUnit.MINUTES);
+
+        return true;
+    }
+
+    @Override
+    public OrderLocationVo getCacheOrderLocation(Long orderId) {
+        String key = RedisConstant.UPDATE_ORDER_LOCATION + orderId;
+
+        OrderLocationVo orderLocationVo = (OrderLocationVo) redisTemplate.opsForValue().get(key);
+        if (orderLocationVo == null) {
+            throw new GuiguException(ResultCodeEnum.DATA_ERROR);
+        }
+
+        return orderLocationVo;
+    }
 }

@@ -6,10 +6,15 @@ import com.atguigu.daijia.common.util.AuthContextHolder;
 import com.atguigu.daijia.customer.service.OrderService;
 import com.atguigu.daijia.model.form.customer.ExpectOrderForm;
 import com.atguigu.daijia.model.form.customer.SubmitOrderForm;
+import com.atguigu.daijia.model.form.map.CalculateDrivingLineForm;
 import com.atguigu.daijia.model.form.order.OrderInfoForm;
 import com.atguigu.daijia.model.form.rules.FeeRuleRequestForm;
 import com.atguigu.daijia.model.vo.customer.ExpectOrderVo;
+import com.atguigu.daijia.model.vo.driver.DriverInfoVo;
+import com.atguigu.daijia.model.vo.map.DrivingLineVo;
+import com.atguigu.daijia.model.vo.map.OrderLocationVo;
 import com.atguigu.daijia.model.vo.order.CurrentOrderInfoVo;
+import com.atguigu.daijia.model.vo.order.OrderInfoVo;
 import com.atguigu.daijia.model.vo.rules.FeeRuleResponseVo;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -26,16 +31,6 @@ public class OrderController {
 
     @Autowired
     private OrderService orderService;
-
-    //TODO 后续完善, 目前假设乘客当前没有订单
-    @Operation(summary = "查找乘客端当前订单")
-    @GetMapping("/searchCustomerCurrentOrder")
-    @LoginAuth
-    public Result<CurrentOrderInfoVo> searchCustomerCurrentOrder(){
-        CurrentOrderInfoVo currentOrderInfoVo = new CurrentOrderInfoVo();
-        currentOrderInfoVo.setIsHasCurrentOrder(false);
-        return Result.ok(currentOrderInfoVo);
-    }
 
     @Operation(summary = "预估订单数据")
     @PostMapping("/expectOrder")
@@ -61,5 +56,42 @@ public class OrderController {
         return Result.ok(orderService.getOrderStatus(orderId));
     }
 
-}
+    @Operation(summary = "乘客端查找当前订单")
+    @GetMapping("/searchCustomerCurrentOrder")
+    @LoginAuth
+    public Result<CurrentOrderInfoVo> searchCustomerCurrentOrder() {
+        Long customerId = AuthContextHolder.getUserId();
+        return Result.ok(orderService.searchCustomerCurrentOrder(customerId));
+    }
 
+    @Operation(summary = "乘客端获取订单信息")
+    @GetMapping("/getOrderInfo/{orderId}")
+    @LoginAuth
+    public Result<OrderInfoVo> getOrderInfo(@PathVariable Long orderId) {
+        Long customerId = AuthContextHolder.getUserId();
+        return Result.ok(orderService.getOrderInfo(orderId, customerId));
+    }
+
+    @Operation(summary = "司乘同显: 乘客根据订单Id获取司机基本信息")
+    @GetMapping("/getDriverInfo/{orderId}")
+    @LoginAuth
+    public Result<DriverInfoVo> getDriverInfo(@PathVariable Long orderId) {
+        Long customerId = AuthContextHolder.getUserId();
+        return Result.ok(orderService.getDriverInfo(orderId, customerId));
+    }
+
+    @Operation(summary = "司乘同显: 乘客获取订单经纬度信息")
+    @GetMapping("/getCacheOrderLocation/{orderId}")
+    @LoginAuth
+    public Result<OrderLocationVo> getCacheOrderLocation(@PathVariable Long orderId) {
+        return Result.ok(orderService.getCacheOrderLocation(orderId));
+    }
+
+    @Operation(summary = "计算最佳驾驶线路")
+    @PostMapping("/calculateDrivingLine")
+    @LoginAuth
+    public Result<DrivingLineVo> calculateDrivingLine(@RequestBody CalculateDrivingLineForm calculateDrivingLineForm) {
+        return Result.ok(orderService.calculateDrivingLine(calculateDrivingLineForm));
+    }
+
+}

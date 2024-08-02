@@ -23,10 +23,9 @@ public class MapController {
 
     @Operation(summary = "计算驾驶路线")
     @PostMapping("/calculateDrivingLine")
-    public Result<DrivingLineVo> calculateDrivingLine(@RequestBody CalculateDrivingLineForm
-                                                                  calculateDrivingLineForm) {
-        DrivingLineVo drivingLineVo = mapService.calculateDrivingLine(calculateDrivingLineForm);
-        return Result.ok(drivingLineVo);
+    public Result<DrivingLineVo> calculateDrivingLine(
+            @RequestBody CalculateDrivingLineForm calculateDrivingLineForm) {
+        return Result.ok(mapService.calculateDrivingLine((calculateDrivingLineForm)));
     }
 
 
