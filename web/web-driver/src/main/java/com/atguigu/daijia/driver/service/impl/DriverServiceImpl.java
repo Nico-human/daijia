@@ -10,8 +10,10 @@ import com.atguigu.daijia.driver.service.DriverService;
 import com.atguigu.daijia.map.client.LocationFeignClient;
 import com.atguigu.daijia.model.form.driver.DriverFaceModelForm;
 import com.atguigu.daijia.model.form.driver.UpdateDriverAuthInfoForm;
+import com.atguigu.daijia.model.form.order.StartDriveForm;
 import com.atguigu.daijia.model.vo.driver.DriverAuthInfoVo;
 import com.atguigu.daijia.model.vo.driver.DriverLoginVo;
+import com.atguigu.daijia.order.client.OrderInfoFeignClient;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -33,6 +35,8 @@ public class DriverServiceImpl implements DriverService {
     private LocationFeignClient locationFeignClient;
     @Autowired
     private NewOrderFeignClient newOrderFeignClient;
+    @Autowired
+    private OrderInfoFeignClient orderInfoFeignClient;
 
     @Override
     public String login(String code) {
@@ -149,6 +153,15 @@ public class DriverServiceImpl implements DriverService {
         newOrderFeignClient.clearNewOrderQueueData(driverId);
 
         return true;
+    }
+
+    @Override
+    public Boolean startDrive(StartDriveForm startDriveForm) {
+        Result<Boolean> booleanResult = orderInfoFeignClient.startDrive(startDriveForm);
+        if (booleanResult.getCode() != 200) {
+            throw new GuiguException(ResultCodeEnum.FEIGN_FAIL);
+        }
+        return booleanResult.getData();
     }
 
 

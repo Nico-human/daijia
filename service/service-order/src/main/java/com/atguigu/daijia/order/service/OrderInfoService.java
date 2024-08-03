@@ -2,6 +2,7 @@ package com.atguigu.daijia.order.service;
 
 import com.atguigu.daijia.model.entity.order.OrderInfo;
 import com.atguigu.daijia.model.form.order.OrderInfoForm;
+import com.atguigu.daijia.model.form.order.StartDriveForm;
 import com.atguigu.daijia.model.form.order.UpdateOrderCartForm;
 import com.atguigu.daijia.model.vo.order.CurrentOrderInfoVo;
 import com.baomidou.mybatisplus.extension.service.IService;
@@ -59,4 +60,10 @@ public interface OrderInfoService extends IService<OrderInfo> {
      */
     Boolean updateOrderCart(UpdateOrderCartForm updateOrderCartForm);
 
+    /**
+     * 司机开始代驾, 更新订单状态
+     * @param startDriveForm
+     * @return
+     */
+    Boolean startDriver(StartDriveForm startDriveForm);
 }

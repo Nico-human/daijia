@@ -7,11 +7,14 @@ import com.atguigu.daijia.driver.client.DriverInfoFeignClient;
 import com.atguigu.daijia.driver.service.LocationService;
 import com.atguigu.daijia.map.client.LocationFeignClient;
 import com.atguigu.daijia.model.entity.driver.DriverSet;
+import com.atguigu.daijia.model.form.map.OrderServiceLocationForm;
 import com.atguigu.daijia.model.form.map.UpdateDriverLocationForm;
 import com.atguigu.daijia.model.form.map.UpdateOrderLocationForm;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Slf4j
 @Service
@@ -47,6 +50,15 @@ public class LocationServiceImpl implements LocationService {
     @Override
     public Boolean updateOrderLocationToCache(UpdateOrderLocationForm updateOrderLocationForm) {
         Result<Boolean> booleanResult = locationFeignClient.updateOrderLocationToCache(updateOrderLocationForm);
+        if (booleanResult.getCode() != 200) {
+            throw new GuiguException(ResultCodeEnum.FEIGN_FAIL);
+        }
+        return booleanResult.getData();
+    }
+
+    @Override
+    public Boolean saveOrderServiceLocation(List<OrderServiceLocationForm> orderServiceLocationFormList) {
+        Result<Boolean> booleanResult = locationFeignClient.saveOrderServiceLocation(orderServiceLocationFormList);
         if (booleanResult.getCode() != 200) {
             throw new GuiguException(ResultCodeEnum.FEIGN_FAIL);
         }

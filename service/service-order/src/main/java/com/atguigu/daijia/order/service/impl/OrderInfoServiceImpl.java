@@ -7,6 +7,7 @@ import com.atguigu.daijia.model.entity.order.OrderInfo;
 import com.atguigu.daijia.model.entity.order.OrderStatusLog;
 import com.atguigu.daijia.model.enums.OrderStatusEnum;
 import com.atguigu.daijia.model.form.order.OrderInfoForm;
+import com.atguigu.daijia.model.form.order.StartDriveForm;
 import com.atguigu.daijia.model.form.order.UpdateOrderCartForm;
 import com.atguigu.daijia.model.vo.order.CurrentOrderInfoVo;
 import com.atguigu.daijia.order.mapper.OrderInfoMapper;
@@ -23,7 +24,6 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
-import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -216,6 +216,24 @@ public class OrderInfoServiceImpl extends ServiceImpl<OrderInfoMapper, OrderInfo
         OrderInfo orderInfo = new OrderInfo();
         BeanUtils.copyProperties(updateOrderCartForm, orderInfo);
         orderInfo.setStatus(OrderStatusEnum.UPDATE_CART_INFO.getStatus());
+
+        int rows = orderInfoMapper.update(orderInfo, wrapper);
+        if (rows != 1) {
+            throw new GuiguException(ResultCodeEnum.UPDATE_ERROR);
+        } else {
+            return true;
+        }
+    }
+
+    @Override
+    public Boolean startDriver(StartDriveForm startDriveForm) {
+        OrderInfo orderInfo = new OrderInfo();
+        orderInfo.setStatus(OrderStatusEnum.START_SERVICE.getStatus());
+        orderInfo.setStartServiceTime(new Date());
+        //根据订单id, 司机id更新订单状态
+        LambdaQueryWrapper<OrderInfo> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(OrderInfo::getId, startDriveForm.getOrderId());
+        wrapper.eq(OrderInfo::getDriverId, startDriveForm.getDriverId());
 
         int rows = orderInfoMapper.update(orderInfo, wrapper);
         if (rows != 1) {

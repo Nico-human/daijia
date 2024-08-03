@@ -7,6 +7,7 @@ import com.atguigu.daijia.model.vo.customer.ExpectOrderVo;
 import com.atguigu.daijia.model.vo.driver.DriverInfoVo;
 import com.atguigu.daijia.model.vo.map.DrivingLineVo;
 import com.atguigu.daijia.model.vo.map.OrderLocationVo;
+import com.atguigu.daijia.model.vo.map.OrderServiceLastLocationVo;
 import com.atguigu.daijia.model.vo.order.CurrentOrderInfoVo;
 import com.atguigu.daijia.model.vo.order.OrderInfoVo;
 
@@ -73,4 +74,11 @@ public interface OrderService {
      * @return
      */
     DrivingLineVo calculateDrivingLine(CalculateDrivingLineForm calculateDrivingLineForm);
+
+    /**
+     * 代驾服务: 获取订单服务最后一个位置信息
+     * @param orderId
+     * @return
+     */
+    OrderServiceLastLocationVo getOrderServiceLastLocation(Long orderId);
 }
