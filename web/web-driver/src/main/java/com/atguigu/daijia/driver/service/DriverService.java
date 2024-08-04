@@ -78,11 +78,4 @@ public interface DriverService {
      */
     Boolean stopService(Long driverId);
 
-    /**
-     * 司机开始代驾, 更新订单状态
-     * @param startDriveForm
-     * @return
-     */
-    Boolean startDrive(StartDriveForm startDriveForm);
-
 }

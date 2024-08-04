@@ -3,14 +3,19 @@ package com.atguigu.daijia.order.service.impl;
 import com.atguigu.daijia.common.constant.RedisConstant;
 import com.atguigu.daijia.common.execption.GuiguException;
 import com.atguigu.daijia.common.result.ResultCodeEnum;
+import com.atguigu.daijia.model.entity.order.OrderBill;
 import com.atguigu.daijia.model.entity.order.OrderInfo;
+import com.atguigu.daijia.model.entity.order.OrderProfitsharing;
 import com.atguigu.daijia.model.entity.order.OrderStatusLog;
 import com.atguigu.daijia.model.enums.OrderStatusEnum;
 import com.atguigu.daijia.model.form.order.OrderInfoForm;
 import com.atguigu.daijia.model.form.order.StartDriveForm;
+import com.atguigu.daijia.model.form.order.UpdateOrderBillForm;
 import com.atguigu.daijia.model.form.order.UpdateOrderCartForm;
 import com.atguigu.daijia.model.vo.order.CurrentOrderInfoVo;
+import com.atguigu.daijia.order.mapper.OrderBillMapper;
 import com.atguigu.daijia.order.mapper.OrderInfoMapper;
+import com.atguigu.daijia.order.mapper.OrderProfitsharingMapper;
 import com.atguigu.daijia.order.mapper.OrderStatusLogMapper;
 import com.atguigu.daijia.order.service.OrderInfoService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -39,6 +44,10 @@ public class OrderInfoServiceImpl extends ServiceImpl<OrderInfoMapper, OrderInfo
     private RedisTemplate redisTemplate;
     @Autowired
     private RedissonClient redissonClient;
+    @Autowired
+    private OrderBillMapper orderBillMapper;
+    @Autowired
+    private OrderProfitsharingMapper orderProfitsharingMapper;
 
     @Override
     public Long saveOrderInfo(OrderInfoForm orderInfoForm) {
@@ -61,7 +70,7 @@ public class OrderInfoServiceImpl extends ServiceImpl<OrderInfoMapper, OrderInfo
         orderStatusLogMapper.insert(orderStatusLog);
 
         // 向redis中添加标识
-        redisTemplate.opsForValue().set(RedisConstant.ORDER_ACCEPT_MARK,
+        redisTemplate.opsForValue().set(RedisConstant.ORDER_ACCEPT_MARK + orderInfo.getId(),
                                         "0",
                                         RedisConstant.ORDER_ACCEPT_MARK_EXPIRES_TIME,
                                         TimeUnit.MINUTES);
@@ -87,7 +96,7 @@ public class OrderInfoServiceImpl extends ServiceImpl<OrderInfoMapper, OrderInfo
     @Override
     public Boolean robNewOrder(Long driverId, Long orderId) {
 
-        if (Boolean.FALSE.equals(redisTemplate.hasKey(RedisConstant.ORDER_ACCEPT_MARK))){
+        if (Boolean.FALSE.equals(redisTemplate.hasKey(RedisConstant.ORDER_ACCEPT_MARK + orderId))){
             throw new GuiguException(ResultCodeEnum.COB_NEW_ORDER_FAIL);
         }
 
@@ -96,7 +105,7 @@ public class OrderInfoServiceImpl extends ServiceImpl<OrderInfoMapper, OrderInfo
             boolean isLock = lock.tryLock(RedisConstant.ROB_NEW_ORDER_LOCK_WAIT_TIME,
                                           RedisConstant.ROB_NEW_ORDER_LOCK_LEASE_TIME, TimeUnit.SECONDS);
 
-            if (isLock && Boolean.TRUE.equals(redisTemplate.hasKey(RedisConstant.ORDER_ACCEPT_MARK))) {
+            if (isLock && Boolean.TRUE.equals(redisTemplate.hasKey(RedisConstant.ORDER_ACCEPT_MARK + orderId))) {
                 LambdaQueryWrapper<OrderInfo> wrapper = new LambdaQueryWrapper<>();
                 wrapper.eq(OrderInfo::getId, orderId);
                 wrapper.eq(OrderInfo::getStatus, OrderStatusEnum.WAITING_ACCEPT.getStatus());  // 版本号 实现乐观锁;
@@ -112,7 +121,7 @@ public class OrderInfoServiceImpl extends ServiceImpl<OrderInfoMapper, OrderInfo
                     throw new GuiguException(ResultCodeEnum.COB_NEW_ORDER_FAIL);
                 }
                 // 删除redis中的标识
-                redisTemplate.delete(RedisConstant.ORDER_ACCEPT_MARK);
+                redisTemplate.delete(RedisConstant.ORDER_ACCEPT_MARK + orderId);
             }
 
         } catch (InterruptedException e) {
@@ -241,6 +250,55 @@ public class OrderInfoServiceImpl extends ServiceImpl<OrderInfoMapper, OrderInfo
         } else {
             return true;
         }
+    }
+
+    @Override
+    public Long getOrderNumByTime(String startTime, String endTime) {
+        // select COUNT(*) from order_info where start_service_time >= startTime and start_service_time < endTime
+        LambdaQueryWrapper<OrderInfo> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.ge(OrderInfo::getStartServiceTime, startTime);
+        queryWrapper.lt(OrderInfo::getStartServiceTime, endTime);
+
+        return orderInfoMapper.selectCount(queryWrapper);
+    }
+
+    @Override
+    public Boolean endDrive(UpdateOrderBillForm updateOrderBillForm) {
+
+        LambdaQueryWrapper<OrderInfo> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(OrderInfo::getId, updateOrderBillForm.getOrderId());
+        queryWrapper.eq(OrderInfo::getDriverId, updateOrderBillForm.getDriverId());
+
+        OrderInfo orderInfo = new OrderInfo();
+        orderInfo.setStatus(OrderStatusEnum.END_SERVICE.getStatus());
+        orderInfo.setRealAmount(updateOrderBillForm.getTotalAmount());
+        orderInfo.setFavourFee(updateOrderBillForm.getFavourFee());
+        orderInfo.setRealDistance(updateOrderBillForm.getRealDistance());
+        orderInfo.setEndServiceTime(new Date());
+
+        int rows = orderInfoMapper.update(orderInfo, queryWrapper);
+
+        if (rows == 1) {
+            // 添加账单数据 order_bill
+            OrderBill orderBill = new OrderBill();
+            BeanUtils.copyProperties(updateOrderBillForm, orderBill);
+            orderBill.setOrderId(updateOrderBillForm.getOrderId());
+            orderBill.setPayAmount(updateOrderBillForm.getTotalAmount());
+            orderBillMapper.insert(orderBill);
+
+            // 添加分账数据 order_profitsharing
+            OrderProfitsharing orderProfitsharing = new OrderProfitsharing();
+            BeanUtils.copyProperties(updateOrderBillForm, orderProfitsharing);
+            orderProfitsharing.setOrderId(updateOrderBillForm.getOrderId());
+            orderProfitsharing.setRuleId(updateOrderBillForm.getProfitsharingRuleId());
+            orderProfitsharing.setStatus(1);
+            orderProfitsharingMapper.insert(orderProfitsharing);
+
+        } else {
+            throw new GuiguException(ResultCodeEnum.UPDATE_ERROR);
+        }
+
+        return true;
     }
 
 //    public void log(Long orderId, Integer status){

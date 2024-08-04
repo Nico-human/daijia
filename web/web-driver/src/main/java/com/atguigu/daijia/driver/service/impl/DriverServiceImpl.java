@@ -155,14 +155,4 @@ public class DriverServiceImpl implements DriverService {
         return true;
     }
 
-    @Override
-    public Boolean startDrive(StartDriveForm startDriveForm) {
-        Result<Boolean> booleanResult = orderInfoFeignClient.startDrive(startDriveForm);
-        if (booleanResult.getCode() != 200) {
-            throw new GuiguException(ResultCodeEnum.FEIGN_FAIL);
-        }
-        return booleanResult.getData();
-    }
-
-
 }

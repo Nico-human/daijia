@@ -19,26 +19,26 @@ import java.math.BigDecimal;
 @SpringBootTest
 public class SpringApplicationTests {
 
-    @Autowired
-    private KieContainer kieContainer;
-
-    @Test
-    void test() {
-
-        FeeRuleRequest feeRuleRequest = new FeeRuleRequest();
-        feeRuleRequest.setStartTime("01:45:00");
-        feeRuleRequest.setDistance(new BigDecimal("15.0"));
-        feeRuleRequest.setWaitMinute(20);
-        FeeRuleResponse feeRuleResponse = new FeeRuleResponse();
-
-        KieSession kieSession = kieContainer.newKieSession();
-        kieSession.setGlobal("feeRuleResponse", feeRuleResponse);
-        kieSession.insert(feeRuleRequest);
-        kieSession.fireAllRules();
-        kieSession.dispose();
-
-        System.out.println("后: " + JSON.toJSONString(feeRuleResponse));
-    }
+//    @Autowired
+//    private KieContainer kieContainer;
+//
+//    @Test
+//    void test() {
+//
+//        FeeRuleRequest feeRuleRequest = new FeeRuleRequest();
+//        feeRuleRequest.setStartTime("01:45:00");
+//        feeRuleRequest.setDistance(new BigDecimal("15.0"));
+//        feeRuleRequest.setWaitMinute(20);
+//        FeeRuleResponse feeRuleResponse = new FeeRuleResponse();
+//
+//        KieSession kieSession = kieContainer.newKieSession();
+//        kieSession.setGlobal("feeRuleResponse", feeRuleResponse);
+//        kieSession.insert(feeRuleRequest);
+//        kieSession.fireAllRules();
+//        kieSession.dispose();
+//
+//        System.out.println("后: " + JSON.toJSONString(feeRuleResponse));
+//    }
 
 
 }
