@@ -22,7 +22,17 @@ public interface NewOrderService {
      */
     void executeTask(long jobId);
 
+    /**
+     *
+     * @param driverId
+     * @return
+     */
     List<NewOrderDataVo> findNewOrderQueueData(Long driverId);
 
+    /**
+     *
+     * @param driverId
+     * @return
+     */
     Boolean clearNewOrderQueueData(Long driverId);
 }

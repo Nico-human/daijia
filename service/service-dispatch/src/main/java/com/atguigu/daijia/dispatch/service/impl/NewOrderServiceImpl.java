@@ -115,6 +115,7 @@ public class NewOrderServiceImpl implements NewOrderService {
                 // 一个司机也对应多个订单
                 NewOrderDataVo newOrderDataVo = new NewOrderDataVo();
                 BeanUtils.copyProperties(newOrderTaskVo, newOrderDataVo);
+                newOrderDataVo.setDistance(nearByDriver.getDistance());  // 设置乘客与司机之间的距离
                 String driverKey = RedisConstant.DRIVER_ORDER_TEMP_LIST + nearByDriver.getDriverId(); // 根据司机id生成key
                 redisTemplate.opsForList().leftPush(driverKey, JSONObject.toJSONString(newOrderDataVo));
                 redisTemplate.expire(driverKey, RedisConstant.DRIVER_ORDER_TEMP_LIST_EXPIRES_TIME, TimeUnit.MINUTES); // 设置过期时间
