@@ -18,6 +18,7 @@ import com.atguigu.daijia.model.form.order.UpdateOrderCartForm;
 import com.atguigu.daijia.model.form.rules.FeeRuleRequestForm;
 import com.atguigu.daijia.model.form.rules.ProfitsharingRuleRequestForm;
 import com.atguigu.daijia.model.form.rules.RewardRuleRequestForm;
+import com.atguigu.daijia.model.vo.base.PageVo;
 import com.atguigu.daijia.model.vo.map.DrivingLineVo;
 import com.atguigu.daijia.model.vo.map.OrderLocationVo;
 import com.atguigu.daijia.model.vo.map.OrderServiceLastLocationVo;
@@ -241,5 +242,10 @@ public class OrderServiceImpl implements OrderService {
         updateOrderBillForm.setProfitsharingRuleId(profitsharingRuleResponseVo.getProfitsharingRuleId());
 
         return orderInfoFeignClient.endDrive(updateOrderBillForm).getData();
+    }
+
+    @Override
+    public PageVo findDriverOrderPage(Long driverId, Long page, Long limit) {
+        return orderInfoFeignClient.findDriverOrderPage(driverId, page, limit).getData();
     }
 }
