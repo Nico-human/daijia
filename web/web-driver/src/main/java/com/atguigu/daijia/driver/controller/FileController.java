@@ -23,7 +23,7 @@ public class FileController {
 
     @Operation(summary = "上传")
     @PostMapping("/upload")
-    @LoginAuth
+//    @LoginAuth
     public Result<String> upload(@RequestPart("file") MultipartFile file,
                                  @RequestParam(name = "path", defaultValue = "auth") String path) {
         CosUploadVo cosUploadVo = cosService.uploadFile(file, path);
@@ -33,7 +33,7 @@ public class FileController {
 
     @Operation(summary = "Minio文件上传")
     @PostMapping("/uploadMinio") //TODO 修改前端接口
-    @LoginAuth
+//    @LoginAuth
     public Result<String> uploadMinio(@RequestPart MultipartFile multipartFile) {
         return Result.ok(fileService.uploadMinio(multipartFile));
     }

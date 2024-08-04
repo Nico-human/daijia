@@ -101,14 +101,5 @@ public class DriverController {
         return Result.ok(driverService.stopService(driverId));
     }
 
-    @Operation(summary = "司机开始代驾, 更新订单状态")
-    @PostMapping("/startDrive")
-    @LoginAuth
-    public Result<Boolean> startDrive(@RequestBody StartDriveForm startDriveForm) {
-        Long driverId = AuthContextHolder.getUserId();
-        startDriveForm.setDriverId(driverId);
-        return Result.ok(driverService.startDrive(startDriveForm));
-    }
-
 }
 

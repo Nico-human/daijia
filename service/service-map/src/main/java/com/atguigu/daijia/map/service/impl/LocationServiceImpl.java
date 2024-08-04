@@ -5,6 +5,7 @@ import com.atguigu.daijia.common.constant.SystemConstant;
 import com.atguigu.daijia.common.execption.GuiguException;
 import com.atguigu.daijia.common.result.Result;
 import com.atguigu.daijia.common.result.ResultCodeEnum;
+import com.atguigu.daijia.common.util.LocationUtil;
 import com.atguigu.daijia.driver.client.DriverInfoFeignClient;
 import com.atguigu.daijia.map.service.LocationService;
 import com.atguigu.daijia.model.entity.driver.DriverSet;
@@ -200,6 +201,7 @@ public class LocationServiceImpl implements LocationService {
 
         OrderServiceLocation orderServiceLocation = mongoTemplate.findOne(query, OrderServiceLocation.class);
         if (orderServiceLocation == null) {
+            log.info("MongoDB中没有此对象 orderServiceLocation == null ");
             throw new GuiguException(ResultCodeEnum.DATA_ERROR);
         }
 
@@ -207,5 +209,35 @@ public class LocationServiceImpl implements LocationService {
         orderServiceLastLocationVo.setLatitude(orderServiceLocation.getLatitude());
         orderServiceLastLocationVo.setLongitude(orderServiceLocation.getLongitude());
         return orderServiceLastLocationVo;
+    }
+
+    @Override
+    public BigDecimal calculateOrderRealDistance(Long orderId) {
+
+        //1. 根据订单id获取代驾订单位置信息list集合, 根据创建时间排序(升序)
+        Query query = new Query();
+        query.addCriteria(Criteria.where("orderId").is(orderId));
+        query.with(Sort.by(Sort.Direction.ASC, "createTime"));
+        List<OrderServiceLocation> orderServiceLocationList = mongoTemplate.find(query, OrderServiceLocation.class);
+
+        //2. 遍历位置信息list集合, 计算每两个位置之间的距离, 相加得到订单总距离
+        double distance = 0;
+        if (!CollectionUtils.isEmpty(orderServiceLocationList)) {
+
+            for (int i = 0; i < orderServiceLocationList.size() - 1; i++) {
+                OrderServiceLocation locationA = orderServiceLocationList.get(i);
+                OrderServiceLocation locationB = orderServiceLocationList.get(i + 1);
+
+                // A -> B 的距离
+                double _Distance = LocationUtil.getDistance(locationA.getLatitude().doubleValue(),
+                                                            locationA.getLongitude().doubleValue(),
+                                                            locationB.getLatitude().doubleValue(),
+                                                            locationB.getLongitude().doubleValue());
+
+                distance += _Distance;
+            }
+
+        }
+        return new BigDecimal(distance).setScale(2, RoundingMode.HALF_UP);
     }
 }
