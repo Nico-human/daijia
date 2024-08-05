@@ -200,7 +200,8 @@ public class LocationServiceImpl implements LocationService {
         query.limit(1);
 
         OrderServiceLocation orderServiceLocation = mongoTemplate.findOne(query, OrderServiceLocation.class);
-        if (orderServiceLocation == null) {
+
+        if (orderServiceLocation == null) { // TODO: 优化这段代码
             log.info("MongoDB中没有此对象 orderServiceLocation == null ");
             throw new GuiguException(ResultCodeEnum.DATA_ERROR);
         }
