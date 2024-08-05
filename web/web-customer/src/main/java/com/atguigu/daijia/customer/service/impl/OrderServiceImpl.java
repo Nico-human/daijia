@@ -9,6 +9,7 @@ import com.atguigu.daijia.driver.client.DriverInfoFeignClient;
 import com.atguigu.daijia.map.client.LocationFeignClient;
 import com.atguigu.daijia.map.client.MapFeignClient;
 import com.atguigu.daijia.model.entity.order.OrderInfo;
+import com.atguigu.daijia.model.enums.OrderStatusEnum;
 import com.atguigu.daijia.model.form.customer.ExpectOrderForm;
 import com.atguigu.daijia.model.form.customer.SubmitOrderForm;
 import com.atguigu.daijia.model.form.map.CalculateDrivingLineForm;
@@ -22,7 +23,9 @@ import com.atguigu.daijia.model.vo.map.DrivingLineVo;
 import com.atguigu.daijia.model.vo.map.OrderLocationVo;
 import com.atguigu.daijia.model.vo.map.OrderServiceLastLocationVo;
 import com.atguigu.daijia.model.vo.order.CurrentOrderInfoVo;
+import com.atguigu.daijia.model.vo.order.OrderBillVo;
 import com.atguigu.daijia.model.vo.order.OrderInfoVo;
+import com.atguigu.daijia.model.vo.order.OrderProfitsharingVo;
 import com.atguigu.daijia.model.vo.rules.FeeRuleResponseVo;
 import com.atguigu.daijia.order.client.OrderInfoFeignClient;
 import com.atguigu.daijia.rules.client.FeeRuleFeignClient;
@@ -165,6 +168,17 @@ public class OrderServiceImpl implements OrderService {
         OrderInfoVo orderInfoVo = new OrderInfoVo();
         orderInfoVo.setOrderId(orderId);
         BeanUtils.copyProperties(orderInfo, orderInfoVo);
+
+        if (orderInfo.getDriverId() != null) {
+            DriverInfoVo driverInfoVo =
+                    driverInfoFeignClient.getDriverInfoOrder(orderInfo.getDriverId()).getData();
+            orderInfoVo.setDriverInfoVo(driverInfoVo);
+        }
+
+        if (orderInfo.getStatus() >= OrderStatusEnum.UNPAID.getStatus()) {
+            OrderBillVo orderBillVo = orderInfoFeignClient.getOrderBillInfo(orderId).getData();
+            orderInfoVo.setOrderBillVo(orderBillVo);
+        }
         return orderInfoVo;
     }
 

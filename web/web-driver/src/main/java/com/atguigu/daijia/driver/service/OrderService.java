@@ -95,4 +95,12 @@ public interface OrderService {
      * @return
      */
     PageVo findDriverOrderPage(Long driverId, Long page, Long limit);
+
+    /**
+     *
+     * @param orderId
+     * @param driverId
+     * @return
+     */
+    Boolean sendOrderBillInfo(Long orderId, Long driverId);
 }

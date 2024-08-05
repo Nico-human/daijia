@@ -54,7 +54,7 @@ public class OrderController {
         return Result.ok(orderService.searchDriverCurrentOrder(driverId));
     }
 
-    @Operation(summary = "获取订单账户详细信息")
+    @Operation(summary = "司机端获取订单账户详细信息")
     @GetMapping("/getOrderInfo/{orderId}")
     @LoginAuth
     public Result<OrderInfoVo> getOrderInfo(@PathVariable Long orderId) {
@@ -113,7 +113,7 @@ public class OrderController {
     }
 
     @Operation(summary = "获取司机订单分页列表")
-    @GetMapping("findDriverOrderPage/{page}/{limit}")
+    @GetMapping("/findDriverOrderPage/{page}/{limit}")
     @LoginAuth
     public Result<PageVo> findDriverOrderPage(
             @Parameter(name = "page", description = "当前页码", required = true)
@@ -124,6 +124,14 @@ public class OrderController {
         Long driverId = AuthContextHolder.getUserId();
         PageVo pageVo = orderService.findDriverOrderPage(driverId, page, limit);
         return Result.ok(pageVo);
+    }
+
+    @Operation(summary = "司机发送账单信息")
+    @GetMapping("/sendOrderBillInfo/{orderId}")
+    @LoginAuth
+    public Result<Boolean> sendOrderBillInfo(@PathVariable Long orderId) {
+        Long driverId = AuthContextHolder.getUserId();
+        return Result.ok(orderService.sendOrderBillInfo(orderId, driverId));
     }
 
 }
