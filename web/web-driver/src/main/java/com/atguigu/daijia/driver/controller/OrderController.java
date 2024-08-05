@@ -111,7 +111,7 @@ public class OrderController {
         orderFeeForm.setDriverId(driverId);
         return Result.ok(orderService.endDrive(orderFeeForm));
     }
-
+  
     @Operation(summary = "获取司机订单分页列表")
     @GetMapping("/findDriverOrderPage/{page}/{limit}")
     @LoginAuth
@@ -133,6 +133,5 @@ public class OrderController {
         Long driverId = AuthContextHolder.getUserId();
         return Result.ok(orderService.sendOrderBillInfo(orderId, driverId));
     }
-
 }
 
