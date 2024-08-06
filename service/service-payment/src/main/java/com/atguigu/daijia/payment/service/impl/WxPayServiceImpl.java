@@ -3,9 +3,14 @@ package com.atguigu.daijia.payment.service.impl;
 import com.alibaba.fastjson.JSON;
 import com.atguigu.daijia.common.constant.MqConst;
 import com.atguigu.daijia.common.service.RabbitService;
+import com.atguigu.daijia.driver.client.DriverAccountFeignClient;
 import com.atguigu.daijia.model.entity.payment.PaymentInfo;
+import com.atguigu.daijia.model.enums.TradeTypeEnum;
+import com.atguigu.daijia.model.form.driver.TransferForm;
 import com.atguigu.daijia.model.form.payment.PaymentInfoForm;
+import com.atguigu.daijia.model.vo.order.OrderRewardVo;
 import com.atguigu.daijia.model.vo.payment.WxPrepayVo;
+import com.atguigu.daijia.order.client.OrderInfoFeignClient;
 import com.atguigu.daijia.payment.config.WxPayV3Properties;
 import com.atguigu.daijia.payment.mapper.PaymentInfoMapper;
 import com.atguigu.daijia.payment.mapper.ProfitsharingInfoMapper;
@@ -38,6 +43,10 @@ public class WxPayServiceImpl implements WxPayService {
     private WxPayV3Properties wxPayV3Properties;
     @Autowired
     private RabbitService rabbitService;
+    @Autowired
+    private OrderInfoFeignClient orderInfoFeignClient;
+    @Autowired
+    private DriverAccountFeignClient driverAccountFeignClient;
 
     @Override
     public WxPrepayVo createWxPayment(PaymentInfoForm paymentInfoForm) {
@@ -49,7 +58,7 @@ public class WxPayServiceImpl implements WxPayService {
             if (paymentInfo == null) {
                 paymentInfo = new PaymentInfo();
                 BeanUtils.copyProperties(paymentInfoForm, paymentInfo);
-                paymentInfo.setPaymentStatus(0);
+                paymentInfo.setPaymentStatus(0); // 0: 未支付
                 paymentInfoMapper.insert(paymentInfo);
             }
 
@@ -136,7 +145,7 @@ public class WxPayServiceImpl implements WxPayService {
         if (paymentInfo.getPaymentStatus() == 1) {
             return;
         }
-        paymentInfo.setPaymentStatus(1);
+        paymentInfo.setPaymentStatus(1); // 1: 已支付
         paymentInfo.setOrderNo(orderNo);
         paymentInfo.setTransactionId(transaction.getTransactionId());
         paymentInfo.setCallbackTime(new Date());
@@ -147,12 +156,23 @@ public class WxPayServiceImpl implements WxPayService {
         rabbitService.sendMessage(MqConst.EXCHANGE_ORDER, MqConst.ROUTING_PAY_SUCCESS, orderNo);
     }
 
-    //TODO: 支付成功后续处理
     @Override
-    public void handleOrder(String orderId) {
-        //1 远程调用：更新订单状态：已经支付
+    public void handleOrder(String orderNo) {
 
-        //2 远程调用：获取系统奖励，打入到司机账户
+        //1 远程调用：更新订单状态为 已经支付
+        orderInfoFeignClient.updateOrderPayStatus(orderNo);
+
+        //2 远程调用：获取系统奖励，打入到司机账户(转账)
+        OrderRewardVo orderRewardVo = orderInfoFeignClient.getOrderRewardFee(orderNo).getData();
+        if (orderRewardVo != null && orderRewardVo.getRewardFee().doubleValue() > 0) {
+            TransferForm transferForm = new TransferForm();
+            transferForm.setTradeNo(orderNo);
+            transferForm.setTradeType(TradeTypeEnum.REWARD.getType());
+            transferForm.setContent(TradeTypeEnum.REWARD.getContent());
+            transferForm.setAmount(orderRewardVo.getRewardFee());
+            transferForm.setDriverId(orderRewardVo.getDriverId());
+            driverAccountFeignClient.transfer(transferForm);
+        }
 
         //3 TODO 其他
 

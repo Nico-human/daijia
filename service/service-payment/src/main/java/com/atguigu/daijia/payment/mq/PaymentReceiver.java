@@ -23,6 +23,7 @@ public class PaymentReceiver {
     @Autowired
     private WxPayService wxPayService;
 
+    // 消息接受端
     @RabbitListener(bindings = @QueueBinding(
             value = @Queue(value = MqConst.QUEUE_PAY_SUCCESS, durable = "true"),
             exchange = @Exchange(value = MqConst.EXCHANGE_ORDER),

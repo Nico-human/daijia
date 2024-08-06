@@ -19,6 +19,9 @@ public interface WxPayService {
      */
     Boolean queryPayStatus(String orderNo);
 
-    //TODO: 支付成功后续处理
-    void handleOrder(String orderId);
+    /**
+     * 支付成功后续处理(消息接受端)
+     * @param orderNo
+     */
+    void handleOrder(String orderNo);
 }

@@ -364,6 +364,49 @@ public class OrderInfoServiceImpl extends ServiceImpl<OrderInfoMapper, OrderInfo
         return orderPayVo;
     }
 
+    @Override
+    public Boolean updateOrderPayStatus(String orderNo) {
+        LambdaQueryWrapper<OrderInfo> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(OrderInfo::getOrderNo, orderNo);
+        OrderInfo orderInfo = orderInfoMapper.selectOne(wrapper);
+        if (orderInfo == null || orderInfo.getStatus() == OrderStatusEnum.PAID.getStatus()){
+            return true;
+        }
+
+        LambdaQueryWrapper<OrderInfo> updateWrapper = new LambdaQueryWrapper<>();
+        updateWrapper.eq(OrderInfo::getOrderNo, orderNo);
+        OrderInfo updateOrderInfo = new OrderInfo();
+        updateOrderInfo.setStatus(OrderStatusEnum.PAID.getStatus());
+        updateOrderInfo.setPayTime(new Date());
+
+        int rows = orderInfoMapper.update(updateOrderInfo, updateWrapper);
+        if (rows != 1) {
+            throw new GuiguException(ResultCodeEnum.UPDATE_ERROR);
+        }
+        return true;
+    }
+
+    @Override
+    public OrderRewardVo getOrderRewardFee(String orderNo) {
+        // select id, driver_id from order_info where order_no = ?
+        LambdaQueryWrapper<OrderInfo> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(OrderInfo::getOrderNo, orderNo);
+        wrapper.select(OrderInfo::getId, OrderInfo::getDriverId);
+        OrderInfo orderInfo = orderInfoMapper.selectOne(wrapper);
+
+        LambdaQueryWrapper<OrderBill> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(OrderBill::getOrderId, orderInfo.getId());
+        queryWrapper.select(OrderBill::getRewardFee);
+        OrderBill orderBill = orderBillMapper.selectOne(queryWrapper);
+
+        OrderRewardVo orderRewardVo = new OrderRewardVo();
+        orderRewardVo.setRewardFee(orderBill.getRewardFee());
+        orderRewardVo.setOrderId(orderInfo.getId());
+        orderRewardVo.setDriverId(orderInfo.getDriverId());
+
+        return orderRewardVo;
+    }
+
 
 //    public void log(Long orderId, Integer status){
 //        OrderStatusLog orderStatusLog = new OrderStatusLog();
