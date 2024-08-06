@@ -23,6 +23,8 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import org.redisson.api.RBlockingQueue;
+import org.redisson.api.RDelayedQueue;
 import org.redisson.api.RLock;
 
 import org.redisson.api.RedissonClient;
@@ -65,6 +67,10 @@ public class OrderInfoServiceImpl extends ServiceImpl<OrderInfoMapper, OrderInfo
         orderInfo.setCreateTime(new Date());
         orderInfoMapper.insert(orderInfo);
 
+        // 生成订单之后, 发送延迟消息
+        //TODO: 尝试使用TTL + 死信队列实现超时订单自动取消
+        this.sendDelayMessage(orderInfo.getId());
+
         //记录日志
         OrderStatusLog orderStatusLog = new OrderStatusLog();
         orderStatusLog.setOrderId(orderInfo.getId());
@@ -79,6 +85,33 @@ public class OrderInfoServiceImpl extends ServiceImpl<OrderInfoMapper, OrderInfo
                                         TimeUnit.MINUTES);
 
         return orderInfo.getId();
+    }
+
+    private void sendDelayMessage(Long orderId) {
+        try {
+            // 创建队列
+            RBlockingQueue<Object> blockingQueue = redissonClient.getBlockingQueue("queue_cancel");
+            // 将创建的队列放入延迟队列中
+            RDelayedQueue<Object> delayedQueue = redissonClient.getDelayedQueue(blockingQueue);
+            // 发送消息到延迟队列中, 并设置过期时间
+            delayedQueue.offer(orderId.toString(), RedisConstant.ORDER_ACCEPT_MARK_EXPIRES_TIME, TimeUnit.MINUTES);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public void cancelOrder(long orderId) {
+        OrderInfo orderInfo = orderInfoMapper.selectById(orderId);
+        if (orderInfo.getStatus() == OrderStatusEnum.WAITING_ACCEPT.getStatus()) {
+            orderInfo.setStatus(OrderStatusEnum.CANCEL_ORDER.getStatus());
+            int rows = orderInfoMapper.updateById(orderInfo);
+            if (rows == 1) {
+                // 删除在redis中的标识
+                redisTemplate.delete(RedisConstant.ORDER_ACCEPT_MARK + orderId);
+            }
+
+        }
     }
 
     @Override
