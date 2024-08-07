@@ -64,7 +64,6 @@ public class CustomerServiceImpl implements CustomerService {
     public CustomerLoginVo getCustomerInfo(Long customerId) {
 
         if (customerId == null){
-            // TODO: 跳转登录
             throw new GuiguException(ResultCodeEnum.DATA_ERROR);
         }
 

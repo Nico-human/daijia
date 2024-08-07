@@ -13,10 +13,7 @@ import com.atguigu.daijia.model.form.order.StartDriveForm;
 import com.atguigu.daijia.model.form.order.UpdateOrderBillForm;
 import com.atguigu.daijia.model.form.order.UpdateOrderCartForm;
 import com.atguigu.daijia.model.vo.base.PageVo;
-import com.atguigu.daijia.model.vo.order.CurrentOrderInfoVo;
-import com.atguigu.daijia.model.vo.order.OrderBillVo;
-import com.atguigu.daijia.model.vo.order.OrderListVo;
-import com.atguigu.daijia.model.vo.order.OrderProfitsharingVo;
+import com.atguigu.daijia.model.vo.order.*;
 import com.atguigu.daijia.order.mapper.OrderBillMapper;
 import com.atguigu.daijia.order.mapper.OrderInfoMapper;
 import com.atguigu.daijia.order.mapper.OrderProfitsharingMapper;
@@ -26,6 +23,8 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import org.redisson.api.RBlockingQueue;
+import org.redisson.api.RDelayedQueue;
 import org.redisson.api.RLock;
 
 import org.redisson.api.RedissonClient;
@@ -33,7 +32,9 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -68,6 +69,10 @@ public class OrderInfoServiceImpl extends ServiceImpl<OrderInfoMapper, OrderInfo
         orderInfo.setCreateTime(new Date());
         orderInfoMapper.insert(orderInfo);
 
+        // 生成订单之后, 发送延迟消息
+        //TODO: 尝试使用TTL + 死信队列实现超时订单自动取消
+        this.sendDelayMessage(orderInfo.getId());
+
         //记录日志
         OrderStatusLog orderStatusLog = new OrderStatusLog();
         orderStatusLog.setOrderId(orderInfo.getId());
@@ -82,6 +87,33 @@ public class OrderInfoServiceImpl extends ServiceImpl<OrderInfoMapper, OrderInfo
                                         TimeUnit.MINUTES);
 
         return orderInfo.getId();
+    }
+
+    private void sendDelayMessage(Long orderId) {
+        try {
+            // 创建队列
+            RBlockingQueue<Object> blockingQueue = redissonClient.getBlockingQueue("queue_cancel");
+            // 将创建的队列放入延迟队列中
+            RDelayedQueue<Object> delayedQueue = redissonClient.getDelayedQueue(blockingQueue);
+            // 发送消息到延迟队列中, 并设置过期时间
+            delayedQueue.offer(orderId.toString(), RedisConstant.ORDER_ACCEPT_MARK_EXPIRES_TIME, TimeUnit.MINUTES);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public void cancelOrder(long orderId) {
+        OrderInfo orderInfo = orderInfoMapper.selectById(orderId);
+        if (orderInfo.getStatus() == OrderStatusEnum.WAITING_ACCEPT.getStatus()) {
+            orderInfo.setStatus(OrderStatusEnum.CANCEL_ORDER.getStatus());
+            int rows = orderInfoMapper.updateById(orderInfo);
+            if (rows == 1) {
+                // 删除在redis中的标识
+                redisTemplate.delete(RedisConstant.ORDER_ACCEPT_MARK + orderId);
+            }
+
+        }
     }
 
     @Override
@@ -357,6 +389,68 @@ public class OrderInfoServiceImpl extends ServiceImpl<OrderInfoMapper, OrderInfo
         return true;
     }
 
+    @Override
+    public OrderPayVo getOrderPayVo(String orderNo, Long customerId) {
+        OrderPayVo orderPayVo = orderInfoMapper.selectOrderPayVo(orderNo, customerId);
+        if (orderPayVo != null) {
+            String content = orderPayVo.getStartLocation() + " 到 " + orderPayVo.getEndLocation();
+            orderPayVo.setContent(content);
+        }
+        return orderPayVo;
+    }
+
+    @Override
+    public Boolean updateOrderPayStatus(String orderNo) {
+        LambdaQueryWrapper<OrderInfo> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(OrderInfo::getOrderNo, orderNo);
+        OrderInfo orderInfo = orderInfoMapper.selectOne(wrapper);
+        if (orderInfo == null || orderInfo.getStatus() == OrderStatusEnum.PAID.getStatus()){
+            return true;
+        }
+
+        LambdaQueryWrapper<OrderInfo> updateWrapper = new LambdaQueryWrapper<>();
+        updateWrapper.eq(OrderInfo::getOrderNo, orderNo);
+        OrderInfo updateOrderInfo = new OrderInfo();
+        updateOrderInfo.setStatus(OrderStatusEnum.PAID.getStatus());
+        updateOrderInfo.setPayTime(new Date());
+
+        int rows = orderInfoMapper.update(updateOrderInfo, updateWrapper);
+        if (rows != 1) {
+            throw new GuiguException(ResultCodeEnum.UPDATE_ERROR);
+        }
+        return true;
+    }
+
+    @Override
+    public OrderRewardVo getOrderRewardFee(String orderNo) {
+        // select id, driver_id from order_info where order_no = ?
+        LambdaQueryWrapper<OrderInfo> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(OrderInfo::getOrderNo, orderNo);
+        wrapper.select(OrderInfo::getId, OrderInfo::getDriverId);
+        OrderInfo orderInfo = orderInfoMapper.selectOne(wrapper);
+
+        LambdaQueryWrapper<OrderBill> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(OrderBill::getOrderId, orderInfo.getId());
+        queryWrapper.select(OrderBill::getRewardFee);
+        OrderBill orderBill = orderBillMapper.selectOne(queryWrapper);
+
+        OrderRewardVo orderRewardVo = new OrderRewardVo();
+        orderRewardVo.setRewardFee(orderBill.getRewardFee());
+        orderRewardVo.setOrderId(orderInfo.getId());
+        orderRewardVo.setDriverId(orderInfo.getDriverId());
+
+        return orderRewardVo;
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public Boolean updateCouponAmount(Long orderId, BigDecimal couponAmount) {
+        int rows = orderBillMapper.updateCouponAmount(orderId, couponAmount);
+        if (rows != 1) {
+            throw new GuiguException(ResultCodeEnum.UPDATE_ERROR);
+        }
+        return true;
+    }
 
 //    public void log(Long orderId, Integer status){
 //        OrderStatusLog orderStatusLog = new OrderStatusLog();

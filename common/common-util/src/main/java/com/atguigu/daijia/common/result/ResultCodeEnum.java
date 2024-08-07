@@ -45,6 +45,7 @@ public enum ResultCodeEnum {
     COUPON_EXPIRE( 250, "优惠券已过期"),
     COUPON_LESS( 250, "优惠券库存不足"),
     COUPON_USER_LIMIT( 250, "超出领取数量"),
+    COUPON_NOT_ACHIEVE_CONDITION_AMOUNT(250, "订单未达到优惠券门槛"),
     ;
 
     private Integer code;

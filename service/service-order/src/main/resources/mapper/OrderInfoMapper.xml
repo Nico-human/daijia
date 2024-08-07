@@ -35,5 +35,21 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         order by info.create_time DESC
     </select>
 
+    <!--获取订单支付信息-->
+    <select id="selectOrderPayVo" resultType="com.atguigu.daijia.model.vo.order.OrderPayVo">
+        select
+            bill.order_id,
+            info.customer_id,
+            info.driver_id,
+            info.order_no,
+            bill.pay_amount,
+            bill.coupon_amount,
+            info.start_location,
+            info.end_location,
+            info.status
+        from order_info info inner join order_bill bill on info.id = bill.order_id
+        where info.order_no = #{orderNo} and info.customer_id = #{customerId};
+    </select>
+
 </mapper>
 

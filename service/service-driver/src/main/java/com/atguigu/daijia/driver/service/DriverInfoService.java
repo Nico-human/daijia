@@ -88,4 +88,12 @@ public interface DriverInfoService extends IService<DriverInfo> {
      * @return
      */
     DriverInfoVo getDriverInfoOrder(Long driverId);
+
+    /**
+     * 获取司机OpenId
+     * @param driverId
+     * @return
+     */
+    String getDriverOpenId(Long driverId);
+
 }
