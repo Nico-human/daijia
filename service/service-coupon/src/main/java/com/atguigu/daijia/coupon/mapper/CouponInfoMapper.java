@@ -10,6 +10,8 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+import java.util.List;
+
 @Mapper
 public interface CouponInfoMapper extends BaseMapper<CouponInfo> {
 
@@ -20,4 +22,6 @@ public interface CouponInfoMapper extends BaseMapper<CouponInfo> {
     IPage<UsedCouponVo> findUsedPage(Page<CouponInfo> pageParam, @Param("customerId") Long customerId);
 
     int updateReceiveCount(@Param("id") Long couponId);
+
+    List<NoUseCouponVo> findNoUseList(Long customerId);
 }

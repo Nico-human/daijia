@@ -175,9 +175,6 @@ public class WxPayServiceImpl implements WxPayService {
             transferForm.setDriverId(orderRewardVo.getDriverId());
             driverAccountFeignClient.transfer(transferForm);
         }
-
-        //3 TODO 其他
-
     }
 
 }
